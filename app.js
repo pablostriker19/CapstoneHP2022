@@ -4,8 +4,19 @@ const hbs = require("hbs");
 const router = express.Router();
 const path = require("path");
 
-//Sesiones
-const session = require("express-session");
+//Sesiones: este es el codigo necesario para las sesiones
+    const session = require("express-session");
+    app.use(session({
+        secret: "clavesecretajkdsfn904309gtfi",
+        resave: false,
+        saveUninitialized: false
+    }));
+//Aqui voy a definir las rutas para mostrarlas en funcion del usuario esta logueado o no
+router.get("/inicio",function(req,res){
+     
+})
+
+
 const res = require("express/lib/response");
 
 
@@ -16,14 +27,15 @@ hbs.registerPartials(__dirname + "/src/views/partials");
 app.use("/", router);
 
 //RENDERIZACION DE PAGINAS
-//Pagina principal get
+//Pagina de login
 app.get("/", (req, res, next) => {
-    res.render("registro");
+    res.render("index");
+    console.log(req.session.user_id);
 });
 
-//Pagina principal
-app.get("/index", (request, response, next) => {
-    response.render("index");
+//Pagina de registro
+app.get("/registro", (request, response, next) => {
+    response.render("registro");
 });
 
 //Pagina de inicio
@@ -35,30 +47,87 @@ app.get("/inicio", (request, response, next) => {
 app.get("/mispokemons", (request, response, next) => {
     
     //POKEMONS DE PRUEBA
-        const pokemons = [
-            {
-                name: "Ekans",
-                photo: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/009.png",
-                especie: "Serpiente",
-                tipo: "Veneno",
-                habilidades: "Intimidar, mudar"
-            },
-            {
-                name: "Exeggutor",
-                photo: "https://static.wikia.nocookie.net/espokemon/images/e/e0/Exeggutor.png/revision/latest?cb=20080908162819",
-                especie: "Coco",
-                tipo: "Planta, Psiquico",
-                habilidades: "Clorofila"
-            },
+    const pokemons = [
+        {
+            name: "Charizard",
+            photo: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/006.png",
+            tipo: "Fuego"
+        },
+        {
+            name: "Blastoise",
+            photo: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/009.png",
+            tipo: "Agua"
+        },
+        {
+            name: "Pikachu",
+            photo: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/025.png",
+            tipo: "Electrico"
+        },
 
-        ];
+    ];
 response.render("mispokemons", {pokemons});
 });
 
 //Pagina añadir pokemons
 app.get("/maspokemons", (request, response, next) => {
-    response.render("maspokemons");
+
+    //POKEMONS DE PRUEBA
+    const pokemons = [
+        {
+            name: "Bulbasaur",
+            photo: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/001.png",
+            tipo: "Planta"
+        },
+        {
+            name: "Ivysaur",
+            photo: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/002.png",
+            tipo: "Planta"
+        },
+        {
+            name: "Venusaur",
+            photo: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/003.png",
+            tipo: "Planta"
+        },
+        {
+            name: "Charmander",
+            photo: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/004.png",
+            tipo: "Fuego"
+        },
+        {
+            name: "Charmeleon",
+            photo: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/005.png",
+            tipo: "Fuego"
+        },
+        {
+            name: "Charizard",
+            photo: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/006.png",
+            tipo: "Fuego"
+        },
+        {
+            name: "Squirtle",
+            photo: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/007.png",
+            tipo: "Agua"
+        },
+        {
+            name: "Wartortle",
+            photo: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/008.png",
+            tipo: "Agua"
+        },
+        {
+            name: "Blastoise",
+            photo: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/009.png",
+            tipo: "Agua"
+        },
+        {
+            name: "Pikachu",
+            photo: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/025.png",
+            tipo: "Electrico"
+        },
+
+    ];
+response.render("maspokemons", {pokemons});
 });
+
 
 //Pagina contacto
 app.get("/contacto", (request, response, next) => {

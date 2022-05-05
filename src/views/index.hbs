@@ -1,5 +1,54 @@
 <div class="container-fluid">
-  <div class="row justify-content-center">
-      <h1>Esto es el index. Aqui debe ir un formulario para Iniciar Sesion / Registrarse</h1>
-  </div>
-</div>
+    <div class="row justify-content-center">
+        <div class="row vh-100 justify-content-around align-items-center">
+            <div id="template-bg-1">
+                <div
+                    class="d-flex flex-column min-vh-100 justify-content-center align-items-center">
+                    <div class="card p-4 text-light bg-dark mb-5">
+                        <div class="card-header">
+                            <h3>Iniciar sesión
+                            </h3>
+                        </div>
+                        <div class="card-body w-100">
+                            <form name="login" action="" method="post">
+                                <div class="input-group form-group mt-3">
+
+                                    <input type="text" class="form-control" placeholder="Usuario" name="username"></div>
+                                    <div class="input-group form-group mt-3">
+
+                                        <input
+                                            type="password"
+                                            class="form-control"
+                                            placeholder="Contraseña"
+                                            name="password"></div>
+
+                                        <div class="form-group mt-3">
+                                            <input
+                                                type="submit"
+                                                value="Acceder"
+                                                class="btn bg-secondary float-end text-white w-100"
+                                                name="login-btn"></div>
+                                        </form>
+                                        <a href="/registro">
+                                            <div class="form-group mt-3">
+                                                <input
+                                                    type="submit"
+                                                    value="Registrarse"
+                                                    class="btn bg-secondary float-end text-white w-100"
+                                                    name="login-btn"></div>
+                                            </a>
+
+                                            <div class="text-danger"></div>
+
+                                        </div>
+                                        <div class="card-footer">
+                                            <div class="d-flex justify-content-center">
+                                                <div class="text-primary">Solo los usuarios registrados pueden acceder.</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
