@@ -1,6 +1,18 @@
 {
+  "name": "Capstone2022",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Pablo, Rodrigo, Juan",
+  "license": "ISC",
   "dependencies": {
     "express": "^4.18.1",
+    "express-session": "^1.17.2",
     "hbs": "^4.2.0",
     "nodemon": "^2.0.16"
   }
