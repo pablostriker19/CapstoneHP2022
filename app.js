@@ -29,12 +29,12 @@ app.use("/", router);
 
 //  Pagina de login
     app.get("/", (req, res, next) => {
-        res.render("index");//, {layout: false});
+        res.render("index", {layout: false});
         console.log(req.session.user_id);
     });
 //  Pagina de registro
     app.get("/registro", (request, response, next) => {
-        response.render("registro");
+        response.render("registro", {layout: false});
     });
 //  Pagina de inicio
     app.get("/inicio", (request, response, next) => {
@@ -130,6 +130,10 @@ app.use("/", router);
 //  Ver pokemon
     app.get("/verpokemon", (request, response, next) => {
         response.render("verpokemon");
+    });
+//  Pagina contacto
+    app.get("/cuenta", (request, response, next) => {
+        response.render("cuenta");
     });
 //  Pagina contacto
     app.get("/contacto", (request, response, next) => {
