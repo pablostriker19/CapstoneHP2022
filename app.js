@@ -15,6 +15,8 @@ const path = require("path");
 
 
 const res = require("express/lib/response");
+const req = require("express/lib/request");
+const cookieParser = require("cookie-parser");
 
 
 app.set("views", __dirname + "/src/views");
@@ -30,7 +32,6 @@ app.use("/", router);
 //  Pagina de login
     app.get("/", (req, res, next) => {
         res.render("index", {layout: false});
-        console.log(req.session.user_id);
     });
 //  Pagina de registro
     app.get("/registro", (request, response, next) => {
@@ -38,15 +39,14 @@ app.use("/", router);
     });
 //  Pagina de inicio
     app.get("/inicio", (request, response, next) => {
-//    if(!request.session.user_id){
-//        response.redirect("/");
-//    } else {
-            response.render("inicio");
-//    }
+    if(!request.session.username){
+        response.redirect("/");
+    } else {
+        response.render("inicio");      
+    }
     });
 //  Pagina de mis pokemons
-    app.get("/mispokemons", (request, response, next) => {
-        
+    app.get("/mispokemons", (request, response, next) => {  
         //POKEMONS DE PRUEBA
         const pokemons = [
             {
@@ -66,7 +66,11 @@ app.use("/", router);
             },
 
         ];
+    if(!request.session.username){
+        response.redirect("/");
+    } else {
         response.render("mispokemons", {pokemons});
+    }
     });
 //  Pagina añadir pokemons
     app.get("/maspokemons", (request, response, next) => {
@@ -125,19 +129,35 @@ app.use("/", router);
             },
 
         ];
-    response.render("maspokemons", {pokemons});
+    if(!request.session.username){
+        response.redirect("/");
+    } else {
+        response.render("maspokemons", {pokemons});
+    }
     });
 //  Ver pokemon
     app.get("/verpokemon", (request, response, next) => {
+    if(!request.session.username){
+        response.redirect("/");
+    } else {
         response.render("verpokemon");
+    }
     });
 //  Pagina contacto
     app.get("/cuenta", (request, response, next) => {
+    if(!request.session.username){
+        response.redirect("/");
+    } else {    
         response.render("cuenta");
+    }
     });
 //  Pagina contacto
     app.get("/contacto", (request, response, next) => {
+    if(!request.session.username){
+        response.redirect("/");
+    } else {    
         response.render("contacto");
+    }
     });
 //  Not found get
     app.get("/*", (request, response, next) => {
@@ -150,6 +170,18 @@ app.use("/", router);
 //  -----------------------------------------------------------------------------------
 
 
+//  Codigo para hacer login
+    router.get("/login", (request, response, next) => {
+        request.session.username = "usuariodeprueba";
+        request.session.save(function(err) {
+            response.redirect("/inicio"); 
+        })      
+    });
+//  Codigo para cerrar sesion
+    router.get("/logout", (request, response, next) => {
+        request.session.destroy();
+        response.redirect("/");      
+    });
 
-
+app.use(cookieParser());
 app.listen(5000, () => console.log("App listening on port 5000!"));
