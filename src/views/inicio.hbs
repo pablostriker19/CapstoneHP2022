@@ -1,35 +1,36 @@
 <div class="container mt-5">
-    <div class="row">
-        <div class="col-md-12 bg-light">
+    <div class="row justify-content-center">
+        <div class="col-md-12 bg-light rounded">
             <div class="row no-gutters">
-                <div class="col-md-1 ml-2">
-                        <img src="https://assets.pokemon.com/assets/cms2/img/pokedex/full/004.png" width="55" height="55"/>
+                <div class="col-md-4 bg-light m-2">
+                    <div class="row justify-content-center">
+                        <img class="rounded-circle img-fluid bg-secondary" src="https://assets.pokemon.com/assets/cms2/img/pokedex/full/004.png" width="95" height="95">
+                    </div>
+                    <div class="row justify-content-center mt-2">
+                        <h2>{{username}}</h2>
+                    </div>
                 </div>
-                <div class="col-md-6 ml-2">
-                  <h1>username</h1>
-                </div>
-            </div>
-            
-        </div>
-    </div>
-</div>
-<div class="container mt-3">
-    <div class="row">
-        <div class="col-md-12 bg-light">
-            <div class="row no-gutters">
-              <div class="col-md-5 ml-2">
-                <a href="mispokemons"><h1>Pokemons encontrados: 3</h1></a>
-              </div>
-              
-            </div>
-        </div>
-    </div>
-</div>
-<div class="container mt-3">
-    <div class="row">
-        <div class="col-md-12 bg-light">
-            <div class="row no-gutters">
-              <h1>Aqui hay algo</h1>
+                <div class="col-md-6">
+                    <div class="justify-content-center">
+                        <div class="row no-gutters">
+                            <div class="col-md-12 ml-5">
+                                <h1>Pokemons encontrados: 3</h1>
+                            </div>
+                        </div>
+                        <div class="row no-gutters">
+                            <div class="col-md-12 ml-5">
+                                {{#each pokemons}} 
+                                    {{> fotospokemonsCard this}} 
+                                {{/each}}
+                            </div>
+                        </div>
+                        <div class="row no-gutters">
+                            <div class="col-md-12 ml-5 mb-2 mt-2">
+                                <a href="mispokemons"><button type="button" class="btn btn-success">Ver todos</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>      
             </div>
         </div>
     </div>

@@ -34,19 +34,42 @@ app.use("/", router);
         res.render("index", {layout: false});
     });
 //  Pagina de registro
-    app.get("/registro", (request, response, next) => {
-        response.render("registro", {layout: false});
+    app.get("/registro", (req, res, next) => {
+        res.render("registro", {layout: false});
     });
 //  Pagina de inicio
-    app.get("/inicio", (request, response, next) => {
-    if(!request.session.username){
-        response.redirect("/");
+    app.get("/inicio", (req, res, next) => {
+                //POKEMONS DE PRUEBA
+                const pokemons = [
+                    {
+                        name: "Charizard",
+                        photo: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/006.png",
+                        tipo: "Fuego"
+                    },
+                    {
+                        name: "Blastoise",
+                        photo: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/009.png",
+                        tipo: "Agua"
+                    },
+                    {
+                        name: "Pikachu",
+                        photo: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/025.png",
+                        tipo: "Electrico"
+                    },
+        
+                ];
+    if(!req.session.username){
+        res.redirect("/");
     } else {
-        response.render("inicio");      
+        let data = {
+            username: req.session.username,
+            pokemons
+        }
+        res.render("inicio", data);      
     }
     });
 //  Pagina de mis pokemons
-    app.get("/mispokemons", (request, response, next) => {  
+    app.get("/mispokemons", (req, res, next) => {  
         //POKEMONS DE PRUEBA
         const pokemons = [
             {
@@ -66,14 +89,14 @@ app.use("/", router);
             },
 
         ];
-    if(!request.session.username){
-        response.redirect("/");
+    if(!req.session.username){
+        res.redirect("/");
     } else {
-        response.render("mispokemons", {pokemons});
+        res.render("mispokemons", {pokemons});
     }
     });
 //  Pagina añadir pokemons
-    app.get("/maspokemons", (request, response, next) => {
+    app.get("/maspokemons", (req, res, next) => {
 
         //POKEMONS DE PRUEBA
         const pokemons = [
@@ -129,58 +152,62 @@ app.use("/", router);
             },
 
         ];
-    if(!request.session.username){
-        response.redirect("/");
+    if(!req.session.username){
+        res.redirect("/");
     } else {
-        response.render("maspokemons", {pokemons});
+        res.render("maspokemons", {pokemons});
     }
     });
 //  Ver pokemon
-    app.get("/verpokemon", (request, response, next) => {
-    if(!request.session.username){
-        response.redirect("/");
+    app.get("/verpokemon", (req, res, next) => {
+    if(!req.session.username){
+        res.redirect("/");
     } else {
-        response.render("verpokemon");
+        res.render("verpokemon");
+    }
+    });
+//  Pagina cuenta
+    app.get("/cuenta", (req, res, next) => {
+    if(!req.session.username){
+        res.redirect("/");
+    } else {    
+        res.render("cuenta", req.session);
     }
     });
 //  Pagina contacto
-    app.get("/cuenta", (request, response, next) => {
-    if(!request.session.username){
-        response.redirect("/");
+    app.get("/contacto", (req, res, next) => {
+    if(!req.session.username){
+        res.redirect("/");
     } else {    
-        response.render("cuenta");
-    }
-    });
-//  Pagina contacto
-    app.get("/contacto", (request, response, next) => {
-    if(!request.session.username){
-        response.redirect("/");
-    } else {    
-        response.render("contacto");
+        res.render("contacto");
     }
     });
 //  Not found get
-    app.get("/*", (request, response, next) => {
-        let dataNotFound = {
-        notFoundImage:
-            "https://ih1.redbubble.net/image.373649743.0630/flat,750x,075,f-pad,750x1000,f8f8f8.u6.jpg",
-        };
-        response.render("404", dataNotFound);
+    app.get("/*", (req, res, next) => {
+        if(!req.session.username){
+            res.redirect("/");
+        } else {    
+            let dataNotFound = {
+            notFoundImage:
+                "https://images6.alphacoders.com/109/1094097.png",
+            };
+            res.render("404", dataNotFound);
+        }
     });
 //  -----------------------------------------------------------------------------------
 
 
 //  Codigo para hacer login
-    router.get("/login", (request, response, next) => {
-        request.session.username = "usuariodeprueba";
-        request.session.save(function(err) {
-            response.redirect("/inicio"); 
+    router.get("/login", (req, res, next) => {
+        req.session.username = "usuariodeprueba";
+        req.session.save(function(err) {
+            res.redirect("/inicio"); 
         })      
     });
 //  Codigo para cerrar sesion
-    router.get("/logout", (request, response, next) => {
-        request.session.destroy();
-        response.redirect("/");      
+    router.get("/logout", (req, res, next) => {
+        req.session.destroy();
+        res.redirect("/");      
     });
 
 app.use(cookieParser());
