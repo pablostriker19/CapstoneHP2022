@@ -1,15 +1,20 @@
-<div class="col-md-4">
-  <div class="card">
-    <img class="card-img-top" src="{{this.photo}}" alt="{{this.name}}"/>
-    <div class="card-body">
-      <h5 class="card-title">
-        {{this.name}} 
-      </h5>
-      <p class="card-text">
-        {{this.tipo}}
-      </p>
+<div class="col-md-4 mt-4">
+  <div class="card w-70" >
+    <img class="card-img-top" style="border: 2px solid #161616;" src="{{this.photo}}" alt="{{this.name}}" />
+    
+    <div class="card-body text-center">
+      
+      <h4 class="card-title"> {{this.name}}</h4>
+      <p class="card-text"> {{this.tipo}}</p>
+      
+      
+      <div class="justify-content-around">
 
-      <button>Añadir</button>
+        <a href="/verpokemon" class="btn btn-success"> Ver </a>
+
+        <a  href="#" class="btn btn-danger"> Eliminar </a>
+
+      </div>
     </div>
   </div>
 </div>

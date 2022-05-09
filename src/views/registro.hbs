@@ -1,18 +1,80 @@
-<!-- Div principal que centra todo -->
-<div class="container-fluid">
-  <div class="row justify-content-center">
-    <div class="row vh-100 justify-content-around align-items-center">
-<!-- Div con el contenido -->
-<div id="template-bg-1">
-        <form class="row g-3 needs-validation" novalidate>
-          <div class="col-md-12">
-            <label for="validationCustom01" class="form-label">First name</label>
-            <input type="text" class="form-control" id="validationCustom01" value="Mark" required>
-         
-        </form>
-</div>
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Capstone HP 2022</title>
+    <link rel="stylesheet" href="/stylesheets/styles.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
 
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="row vh-100 justify-content-around align-items-center">
+                <div class="mask d-flex align-items-center h-100 gradient-custom-3">
+
+                    <div class="card" style="border-radius: 15px;">
+                        <div class="card-body p-5">
+                            <h2 class="text-uppercase text-center mb-5">Registro</h2>
+
+                            <form name="login" action="inicio" method="post">
+
+                                <div class="form-outline mb-4">
+                                    <input
+                                        type="text"
+                                        class="form-control form-control-lg"
+                                        id="username"
+                                        placeholder="Nombre de usuario"
+                                        required/>
+                                </div>
+                                <div class="form-outline mb-4">
+                                    <input
+                                        type="password"
+                                        class="form-control form-control-lg"
+                                        id="password"
+                                        placeholder="Contraseña"
+                                        required/>
+                                </div>
+
+                                
+                                <!-- Div para elegir pokemon inciia-->
+                                <div class="d-flex justify-content-center">
+                                  <h4>Selecciona tu pokemon inicial para continuar</h4></div>
+                                
+                                <div class="d-flex justify-content-center">
+                                  
+                                  <div>
+                                    <input type="image" src="https://assets.pokemon.com/assets/cms2/img/pokedex/full/001.png" width="200" height="200"/>
+                                  </div>
+                                  <div>
+                                    <input type="image" src="https://assets.pokemon.com/assets/cms2/img/pokedex/full/004.png" width="200" height="200"/>
+                                  </div>
+                                  <div>
+                                    <input type="image" src="https://assets.pokemon.com/assets/cms2/img/pokedex/full/007.png" width="200" height="200"/>
+                                  </div>
+                                    
+                                </div>
+                                
+                                
+                                <p class="text-center text-muted mt-5 mb-0">¿Ya tienes cuenta?
+                                    <a href="/" class="fw-bold text-body">
+                                        <u>Inicia sesion</u>
+                                    </a>
+                                </p>
+
+                            </form>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
+</div>
+</body>

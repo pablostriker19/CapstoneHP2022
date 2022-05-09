@@ -1,0 +1,54 @@
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-12 ">
+            <div class="row no-gutters">
+
+                <div class="card col-md-12">
+                    <h3 class="card-header">Datos de la cuenta</h3>
+                    <div class="card-body">
+                        <!-- Cuerpo de la tarjeta -->
+                        <h5 class="card-title">Cambiar nombre</h5>
+                        <form>
+                            <input
+                                type="text"
+                                class="form-control form-control-lg"
+                                id="username"
+                                placeholder={{username}}
+                                required="required"/>
+                            <button class="btn btn-primary mt-2" type="submit">Guardar</button>
+                        </form>
+
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">Cambiar contraseña</h5>
+                        <form>
+                            <input
+                                type="password"
+                                class="form-control form-control-lg"
+                                id="oldpassword"
+                                placeholder="Contraseña anterior"
+                                required="required"/>
+                            <input
+                                type="password"
+                                class="form-control form-control-lg"
+                                id="newpassword"
+                                placeholder="Nueva contraseña"
+                                required="required"/>
+                            <button class="btn btn-primary mt-2" type="submit">Guardar</button>
+                        </form>
+
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">Borrar cuenta</h5>
+                        <form action="/">
+                            <button class="btn btn-danger mt-2" type="submit">Borrar cuenta</button>
+                        </form>
+
+                    </div>
+                    <!-- Fin del cuerpo -->
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
