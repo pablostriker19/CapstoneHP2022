@@ -21,32 +21,37 @@
 
                     <div class="card" style="border-radius: 15px;">
                         <div class="card-body p-5">
-                            <h2 class="text-uppercase text-center mb-5">Iniciar sesion</h2>
+                            <h2 class="text-uppercase text-center mb-5">Iniciar sesión</h2>
 
-                            <form name="login" action="login">
+                            <form name="login" action="/login" method="POST">
 
                                 <div class="form-outline mb-4">
                                     <input
                                         type="text"
+                                        name="inputUsername"
                                         class="form-control form-control-lg"
-                                        id="username"
+                                        id="inputUsername"
                                         placeholder="Nombre de usuario"
-                                        required />
+                                        required autofocus/>
                                 </div>
                                 <div class="form-outline mb-4">
                                     <input
                                         type="password"
+                                        name="inputPassword"
                                         class="form-control form-control-lg"
-                                        id="password"
+                                        id="inputPassword"
                                         placeholder="Contraseña"
                                         required />
                                 </div>
-                                <div class="d-flex justify-content-center">
-                                <button type="submit"
 
-                                    class="btn btn-success btn-block btn-lg gradient-custom-4 text-body">Iniciar sesión</button>
+                                {{#if inicioSesionIncorrecto}}
+                                    <p aria-atomic="true" style="color: #ff0000;" >Usuario o contraseña incorrectos</p>
+                                {{/if}}
+
+                                <div class="d-flex justify-content-center">
+                                <button type="submit" class="btn btn-success btn-block btn-lg gradient-custom-4 text-body">Iniciar sesión</button>
                                 </div>
-                                                
+                                </form>                
                                 
                                 
                                 <p class="text-center text-muted mt-5 mb-0">¿No tienes cuenta?
@@ -55,7 +60,7 @@
                                     </a>
                                 </p>
 
-                            </form>
+                            
 
                         </div>
                     </div>

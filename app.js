@@ -3,6 +3,10 @@ const app = express();
 const hbs = require("hbs");
 const router = express.Router();
 const path = require("path");
+const bodyParser = require("body-parser");
+
+var inicioSesionIncorrecto = false;
+var sessionGuardada;
 
 //Sesiones: este es el codigo necesario para las sesiones
 const session = require("express-session");
@@ -22,6 +26,7 @@ app.set("views", __dirname + "/src/views");
 app.set("view engine", "hbs");
 app.use(express.static(path.join(__dirname, "/src/public")));
 hbs.registerPartials(__dirname + "/src/views/partials");
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/", router);
 
 
@@ -40,6 +45,7 @@ app.get("/registro", (req, res, next) => {
 
 //  Pagina de inicio
 app.get("/inicio", (req, res, next) => {
+
     //POKEMONS DE PRUEBA
     const pokemons = [
         {
@@ -203,11 +209,22 @@ app.get("/*", (req, res, next) => {
 
 
 //  Codigo para hacer login
-router.get("/login", (req, res, next) => {
-    req.session.username = "usuariodeprueba";
-    req.session.save(function(err) {
-        res.redirect("/inicio"); 
-    })      
+app.post("/login", (req, res, next) => {
+    if(req.body.inputUsername == "rodri"){ //Consulta a BBDD
+        req.session.username = req.body.inputUsername;
+        req.session.save(function(err) {
+            res.redirect("/inicio");
+        })
+    }else{
+        inicioSesionIncorrecto = true;
+        res.render("index", {inicioSesionIncorrecto, layout:false});
+    }
+
+});
+//  Codigo para registrarse
+app.post("/registro", (req, res, next) => {
+    
+
 });
 //  Codigo para cerrar sesion
 router.get("/logout", (req, res, next) => {
