@@ -57,11 +57,11 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/", router);
 
 //  CONEXION CON MONGO
-
+/*
 MongoClient.connect(url, function (err, db) {
   console.log("Conectado a MongoDB");
   db.close();
-});
+});*/
 
 //  -----------------------------------------------------------------------------------
 //  RENDERIZACION DE PAGINAS
