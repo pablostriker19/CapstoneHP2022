@@ -9,7 +9,7 @@ import cookieParser from "cookie-parser";
 
 const app = express();
 const router = express.Router();
-const url = "mongodb://localhost/test";
+const url = "mongodb://localhost/users";
 const randomBytes = crypto.randomBytes;
 
 import Pokedex from "pokedex-promise-v2";
@@ -234,18 +234,36 @@ app.get("/*", (req, res, next) => {
 });
 //  -----------------------------------------------------------------------------------
 
+
 //  Codigo para hacer login
 app.post("/login", (req, res, next) => {
-  if (req.body.inputUsername == "rodri") {
-    //Consulta a BBDD
-    req.session.username = req.body.inputUsername;
-    req.session.save(function (err) {
-      res.redirect("/inicio");
+  // Recogemos el username y password que ha introducido el usuario
+  let username = req.body.inputUsername;
+  let password = req.body.inputPassword;
+  console.log(username);
+  console.log(password);
+
+  // Consultamos a la BBDD por el usuario
+  MongoClient.connect(url, function (err, client) {
+    console.log("Conectado a MongoDB");
+    // Client returned
+    var db = client.db("users");
+  
+    db.collection("users").findOne({"username" : username}, function (findErr, result) {
+      if (findErr) throw findErr;
+      client.close();
+      if (password == result.password){
+        req.session.username = req.body.inputUsername;
+        req.session.save(function (err) {
+          res.redirect("/inicio"); 
+        })
+      } else {
+        inicioSesionIncorrecto = true;
+        res.render("index", { inicioSesionIncorrecto, layout: false });
+      }
     });
-  } else {
-    inicioSesionIncorrecto = true;
-    res.render("index", { inicioSesionIncorrecto, layout: false });
-  }
+      
+  });
 });
 //  Codigo para registrarse
 app.post("/registro", (req, res, next) => {});
