@@ -6,29 +6,30 @@ import bodyParser from "body-parser";
 import { MongoClient } from "mongodb";
 import crypto from "crypto";
 import cookieParser from "cookie-parser";
+import session from "express-session";
+import Pokedex from "pokedex-promise-v2";
+import fs from "fs";
 
 const app = express();
 const router = express.Router();
 const randomBytes = crypto.randomBytes;
 
-import Pokedex from "pokedex-promise-v2";
-const P = new Pokedex();
-
 const interval = {
-  limit: 11,
+  limit: 15,
   offset: 0,
 };
-var i;
-P.getPokemonsList(interval).then((response) => {
-  console.log(response.results);
-});
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const P = new Pokedex();
 
 var inicioSesionIncorrecto = false;
-var sessionGuardada;
 
-//Sesiones: este es el codigo necesario para las sesiones
-//const session = require("express-session");
-import session from "express-session";
+app.set("views", __dirname + "/src/views");
+app.set("view engine", "hbs");
+app.use(express.static(path.join(__dirname, "/src/public")));
+hbs.registerPartials(__dirname + "/src/views/partials");
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use("/", router);
 
 app.use(
   session({
@@ -37,24 +38,25 @@ app.use(
     saveUninitialized: false,
   })
 );
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-app.set("views", __dirname + "/src/views");
-app.set("view engine", "hbs");
-app.use(express.static(path.join(__dirname, "/src/public")));
-hbs.registerPartials(__dirname + "/src/views/partials");
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use("/", router);
-
+/*
+var resultados;
+P.getPokemonsList(interval).then((response) => {
+  console.log(response.results);
+  resultados = JSON.stringify(response.results);
+  fs.writeFile("pokemons.json", resultados, function (err, result) {
+    if (err) console.log("error", err);
+  });
+});
+*/
 //  CONEXION CON MONGO
-
-const url = "mongodb://localhost/users";
+let cityData = fs.readFileSync("pokemons.json");
+let cities = JSON.parse(cityData);
+const url = "mongodb://localhost/test";
 MongoClient.connect(url, function (err, client) {
   console.log("Conectado a MongoDB");
   // Client returned
   var db = client.db("test");
-
+  db.collection("pokemon").insertMany(cities);
   db.collection("pokemon").findOne({}, function (findErr, result) {
     if (findErr) throw findErr;
     //console.log(result.name);
@@ -244,7 +246,7 @@ app.post("/login", (req, res, next) => {
   MongoClient.connect(url, function (err, client) {
     console.log("Conectado a MongoDB");
     // Client returned
-    var db = client.db("users");
+    var db = client.db("test");
 
     db.collection("users").findOne(
       { username: username },
