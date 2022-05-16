@@ -240,8 +240,6 @@ app.post("/login", (req, res, next) => {
   // Recogemos el username y password que ha introducido el usuario
   let username = req.body.inputUsername;
   let password = req.body.inputPassword;
-  console.log(username);
-  console.log(password);
 
   // Consultamos a la BBDD por el usuario
   MongoClient.connect(url, function (err, client) {
