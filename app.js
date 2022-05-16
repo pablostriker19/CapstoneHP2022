@@ -9,20 +9,10 @@ import cookieParser from "cookie-parser";
 
 const app = express();
 const router = express.Router();
-const url = "mongodb://localhost/test";
 const randomBytes = crypto.randomBytes;
 
 import Pokedex from "pokedex-promise-v2";
 const P = new Pokedex();
-
-const interval = {
-  limit: 11,
-  offset: 0,
-};
-var i;
-P.getPokemonsList(interval).then((response) => {
-  console.log(response.results);
-});
 
 var inicioSesionIncorrecto = false;
 var sessionGuardada;
@@ -48,13 +38,24 @@ hbs.registerPartials(__dirname + "/src/views/partials");
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/", router);
 
-//  CONEXION CON MONGO
+const interval = {
+  limit: 11,
+  offset: 0,
+};
+var resultados;
+P.getPokemonsList(interval).then((response) => {
+  console.log(response.results);
+  resultados = JSON.stringify(response.results);
+  console.log(resultados);
+});
 
+//  CONEXION CON MONGO
+const url = "mongodb://localhost/test";
 MongoClient.connect(url, function (err, client) {
   console.log("Conectado a MongoDB");
   // Client returned
   var db = client.db("test");
-
+  //db.collection("pokemon").insertMany(resultados);
   db.collection("pokemon").findOne({}, function (findErr, result) {
     if (findErr) throw findErr;
     //console.log(result.name);
