@@ -9,10 +9,20 @@ import cookieParser from "cookie-parser";
 
 const app = express();
 const router = express.Router();
+const url = "mongodb://localhost/users";
 const randomBytes = crypto.randomBytes;
 
 import Pokedex from "pokedex-promise-v2";
 const P = new Pokedex();
+
+const interval = {
+  limit: 11,
+  offset: 0,
+};
+var i;
+P.getPokemonsList(interval).then((response) => {
+  console.log(response.results);
+});
 
 var inicioSesionIncorrecto = false;
 var sessionGuardada;
@@ -38,24 +48,13 @@ hbs.registerPartials(__dirname + "/src/views/partials");
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/", router);
 
-const interval = {
-  limit: 11,
-  offset: 0,
-};
-var resultados;
-P.getPokemonsList(interval).then((response) => {
-  console.log(response.results);
-  resultados = JSON.stringify(response.results);
-  console.log(resultados);
-});
-
 //  CONEXION CON MONGO
-const url = "mongodb://localhost/test";
+
 MongoClient.connect(url, function (err, client) {
   console.log("Conectado a MongoDB");
   // Client returned
   var db = client.db("test");
-  //db.collection("pokemon").insertMany(resultados);
+
   db.collection("pokemon").findOne({}, function (findErr, result) {
     if (findErr) throw findErr;
     //console.log(result.name);
@@ -235,18 +234,34 @@ app.get("/*", (req, res, next) => {
 });
 //  -----------------------------------------------------------------------------------
 
+
 //  Codigo para hacer login
 app.post("/login", (req, res, next) => {
-  if (req.body.inputUsername == "rodri") {
-    //Consulta a BBDD
-    req.session.username = req.body.inputUsername;
-    req.session.save(function (err) {
-      res.redirect("/inicio");
+  // Recogemos el username y password que ha introducido el usuario
+  let username = req.body.inputUsername;
+  let password = req.body.inputPassword;
+
+  // Consultamos a la BBDD por el usuario
+  MongoClient.connect(url, function (err, client) {
+    console.log("Conectado a MongoDB");
+    // Client returned
+    var db = client.db("users");
+  
+    db.collection("users").findOne({"username" : username}, function (findErr, result) {
+      if (findErr) throw findErr;
+      client.close();
+      if (password == result.password){
+        req.session.username = req.body.inputUsername;
+        req.session.save(function (err) {
+          res.redirect("/inicio"); 
+        })
+      } else {
+        inicioSesionIncorrecto = true;
+        res.render("index", { inicioSesionIncorrecto, layout: false });
+      }
     });
-  } else {
-    inicioSesionIncorrecto = true;
-    res.render("index", { inicioSesionIncorrecto, layout: false });
-  }
+      
+  });
 });
 //  Codigo para registrarse
 app.post("/registro", (req, res, next) => {});
