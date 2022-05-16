@@ -9,7 +9,6 @@ import cookieParser from "cookie-parser";
 
 const app = express();
 const router = express.Router();
-const url = "mongodb://localhost/users";
 const randomBytes = crypto.randomBytes;
 
 import Pokedex from "pokedex-promise-v2";
@@ -50,6 +49,7 @@ app.use("/", router);
 
 //  CONEXION CON MONGO
 
+const url = "mongodb://localhost/users";
 MongoClient.connect(url, function (err, client) {
   console.log("Conectado a MongoDB");
   // Client returned
@@ -234,7 +234,6 @@ app.get("/*", (req, res, next) => {
 });
 //  -----------------------------------------------------------------------------------
 
-
 //  Codigo para hacer login
 app.post("/login", (req, res, next) => {
   // Recogemos el username y password que ha introducido el usuario
@@ -246,21 +245,23 @@ app.post("/login", (req, res, next) => {
     console.log("Conectado a MongoDB");
     // Client returned
     var db = client.db("users");
-  
-    db.collection("users").findOne({"username" : username}, function (findErr, result) {
-      if (findErr) throw findErr;
-      client.close();
-      if (password == result.password){
-        req.session.username = req.body.inputUsername;
-        req.session.save(function (err) {
-          res.redirect("/inicio"); 
-        })
-      } else {
-        inicioSesionIncorrecto = true;
-        res.render("index", { inicioSesionIncorrecto, layout: false });
+
+    db.collection("users").findOne(
+      { username: username },
+      function (findErr, result) {
+        if (findErr) throw findErr;
+        client.close();
+        if (password == result.password) {
+          req.session.username = req.body.inputUsername;
+          req.session.save(function (err) {
+            res.redirect("/inicio");
+          });
+        } else {
+          inicioSesionIncorrecto = true;
+          res.render("index", { inicioSesionIncorrecto, layout: false });
+        }
       }
-    });
-      
+    );
   });
 });
 //  Codigo para registrarse
