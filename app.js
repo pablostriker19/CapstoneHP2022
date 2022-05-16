@@ -25,6 +25,7 @@ P.getPokemonsList(interval).then((response) => {
 });
 
 var inicioSesionIncorrecto = false;
+var registroIncorrecto= false;
 var sessionGuardada;
 
 //Sesiones: este es el codigo necesario para las sesiones
@@ -49,7 +50,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/", router);
 
 //  CONEXION CON MONGO
-
+/*
 MongoClient.connect(url, function (err, client) {
   console.log("Conectado a MongoDB");
   // Client returned
@@ -60,7 +61,7 @@ MongoClient.connect(url, function (err, client) {
     //console.log(result.name);
     client.close();
   });
-});
+});*/
 
 //  -----------------------------------------------------------------------------------
 //  RENDERIZACION DE PAGINAS
@@ -129,7 +130,11 @@ app.get("/mispokemons", (req, res, next) => {
   if (!req.session.username) {
     res.redirect("/");
   } else {
-    res.render("mispokemons", { pokemons });
+    let data = {
+      username: req.session.username,
+      pokemons,
+    };
+    res.render("mispokemons", data);
   }
 });
 //  Pagina añadir pokemons
@@ -190,7 +195,11 @@ app.get("/maspokemons", (req, res, next) => {
   if (!req.session.username) {
     res.redirect("/");
   } else {
-    res.render("maspokemons", { pokemons });
+    let data = {
+      username: req.session.username,
+      pokemons,
+    };
+    res.render("maspokemons", data);
   }
 });
 
@@ -199,7 +208,7 @@ app.get("/verpokemon", (req, res, next) => {
   if (!req.session.username) {
     res.redirect("/");
   } else {
-    res.render("verpokemon");
+    res.render("verpokemon", req.session);
   }
 });
 
@@ -217,7 +226,7 @@ app.get("/contacto", (req, res, next) => {
   if (!req.session.username) {
     res.redirect("/");
   } else {
-    res.render("contacto");
+    res.render("contacto", req.session);
   }
 });
 
@@ -228,6 +237,7 @@ app.get("/*", (req, res, next) => {
   } else {
     let dataNotFound = {
       notFoundImage: "https://images6.alphacoders.com/109/1094097.png",
+      username: req.session.username,
     };
     res.render("404", dataNotFound);
   }
@@ -246,25 +256,75 @@ app.post("/login", (req, res, next) => {
     console.log("Conectado a MongoDB");
     // Client returned
     var db = client.db("users");
-  
+    
     db.collection("users").findOne({"username" : username}, function (findErr, result) {
       if (findErr) throw findErr;
       client.close();
-      if (password == result.password){
-        req.session.username = req.body.inputUsername;
-        req.session.save(function (err) {
-          res.redirect("/inicio"); 
-        })
+      if(result){
+        if (password == result.password){
+          req.session.username = req.body.inputUsername;
+          req.session.save(function (err) {
+            res.redirect("/inicio"); 
+          });
+        } else {
+          inicioSesionIncorrecto = true;
+          res.render("index", { inicioSesionIncorrecto, layout: false });
+        }
       } else {
         inicioSesionIncorrecto = true;
         res.render("index", { inicioSesionIncorrecto, layout: false });
       }
+      
     });
       
   });
 });
 //  Codigo para registrarse
-app.post("/registro", (req, res, next) => {});
+app.post("/registro", (req, res, next) => {
+    // Recogemos el username y password que ha introducido el usuario
+    let username = req.body.inputUsername;
+    let password = req.body.inputPassword;
+    let pokeElegido;
+
+    if(req.body.poke1){
+      pokeElegido="1" //Bulbasur
+    }else if(req.body.poke4){
+      pokeElegido="4" //Charmander
+    }else{
+      pokeElegido="7" //Squirtle
+    }
+
+    console.log(username);
+    console.log(password);
+    // Consultamos a la BBDD por el usuario
+    MongoClient.connect(url, function (err, client) {
+      var db = client.db("users");
+      //Buscamos si ya hay un usuario registrado con ese nombre
+      db.collection("users").findOne({"username" : username}, function (findErr, result) {
+        if (findErr) throw findErr;
+        client.close();
+        //Si no hay ningun usuario con ese nombre en la BBDD:
+        if (!result){
+          MongoClient.connect(url, function (err, client) {
+            var db = client.db("users");
+            db.collection("users").insertOne({"username" : username, "password" : password, "pokemons": pokeElegido}, function (findErr, result) {
+              if (findErr) throw findErr;
+              //Redirigimos al inicio con la sesion iniciada
+              client.close();
+              req.session.username = req.body.inputUsername;
+              req.session.save(function (err) {
+                res.redirect("/inicio"); 
+              });
+            });
+          });
+        } else {
+          registroIncorrecto = true;
+          res.render("registro", { registroIncorrecto, layout: false });
+        }
+       
+      });
+    });
+});
 //  Codigo para cerrar sesion
 router.get("/logout", (req, res, next) => {
   req.session.destroy();
