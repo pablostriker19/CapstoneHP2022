@@ -1,40 +1,25 @@
-const express = require("express");
+import express from "express";
+import hbs from "hbs";
+import path from "path";
+import { fileURLToPath } from "url";
+import bodyParser from "body-parser";
+import { MongoClient } from "mongodb";
+import crypto from "crypto";
+import cookieParser from "cookie-parser";
+
 const app = express();
-const hbs = require("hbs");
 const router = express.Router();
-const path = require("path");
-const bodyParser = require("body-parser");
-const MongoClient = require("mongodb").MongoClient;
-const url = "mongodb://localhost/test";
-const crypto = require("crypto");
-const util = require("util");
 const randomBytes = crypto.randomBytes;
 
-const Pokedex = require("pokeapi-js-wrapper");
-const P = new Pokedex.Pokedex();
-
-/*
-const interval = {
-  offset: 1,
-  limit: 1,
-};
-var pokemones = JSON.stringify(P.getPokemonsList(interval));
-var j;
-for (j; j < 2; j++) {
-  console.log(pokemones.count);
-}
-*/
-/*
-P.getPokemonSpeciesByName(25).then(function (response) {
-  console.log(response);
-});
-*/
+import Pokedex from "pokedex-promise-v2";
+const P = new Pokedex();
 
 var inicioSesionIncorrecto = false;
 var sessionGuardada;
 
 //Sesiones: este es el codigo necesario para las sesiones
-const session = require("express-session");
+//const session = require("express-session");
+import session from "express-session";
 
 app.use(
   session({
@@ -44,11 +29,8 @@ app.use(
   })
 );
 
-const res = require("express/lib/response");
-const req = require("express/lib/request");
-const cookieParser = require("cookie-parser");
-const { range } = require("express/lib/request");
-
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 app.set("views", __dirname + "/src/views");
 app.set("view engine", "hbs");
 app.use(express.static(path.join(__dirname, "/src/public")));
@@ -56,11 +38,29 @@ hbs.registerPartials(__dirname + "/src/views/partials");
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/", router);
 
-//  CONEXION CON MONGO
+const interval = {
+  limit: 11,
+  offset: 0,
+};
+var resultados;
+P.getPokemonsList(interval).then((response) => {
+  console.log(response.results);
+  resultados = JSON.stringify(response.results);
+  console.log(resultados);
+});
 
-MongoClient.connect(url, function (err, db) {
+//  CONEXION CON MONGO
+const url = "mongodb://localhost/test";
+MongoClient.connect(url, function (err, client) {
   console.log("Conectado a MongoDB");
-  db.close();
+  // Client returned
+  var db = client.db("test");
+  //db.collection("pokemon").insertMany(resultados);
+  db.collection("pokemon").findOne({}, function (findErr, result) {
+    if (findErr) throw findErr;
+    //console.log(result.name);
+    client.close();
+  });
 });
 
 //  -----------------------------------------------------------------------------------
