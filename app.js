@@ -13,7 +13,7 @@ const app = express();
 const router = express.Router();
 const url = "mongodb://localhost/test";
 const randomBytes = crypto.randomBytes;
-const data = require("../../data");
+//import data from "data.js";
 
 const interval = {
   limit: 15,
@@ -24,11 +24,14 @@ const __dirname = path.dirname(__filename);
 const P = new Pokedex();
 
 var inicioSesionIncorrecto = false;
-<<<<<<< HEAD
+
 var registroIncorrecto= false;
+var passwordIncorrecta = false;
+var passwordCambiada = false;
+var usernameCambiado = false;
+var usernameIncorrecto = false;
 var sessionGuardada;
-=======
->>>>>>> 13453cac9d5c1487186b52a9772647623da9753a
+
 
 app.set("views", __dirname + "/src/views");
 app.set("view engine", "hbs");
@@ -46,7 +49,7 @@ app.use(
 );
 
 
-var i;
+/*var i;
 P.getPokemonsList(interval).then((response) => {
   console.log(response.results);
   data.push(JSON.stringify(response.results)); //Pusheo al JSON data.js
@@ -54,10 +57,9 @@ P.getPokemonsList(interval).then((response) => {
 
 
 //  CONEXION CON MONGO
-<<<<<<< HEAD
+
 /*
-=======
->>>>>>> 13453cac9d5c1487186b52a9772647623da9753a
+
 MongoClient.connect(url, function (err, client) {
   console.log("Conectado a MongoDB");
   // Client returned
@@ -260,7 +262,6 @@ app.post("/login", (req, res, next) => {
 
   // Consultamos a la BBDD por el usuario
   MongoClient.connect(url, function (err, client) {
-    console.log("Conectado a MongoDB");
     // Client returned
     var db = client.db("users");
     
@@ -301,8 +302,7 @@ app.post("/registro", (req, res, next) => {
       pokeElegido="7" //Squirtle
     }
 
-    console.log(username);
-    console.log(password);
+   
     // Consultamos a la BBDD por el usuario
     MongoClient.connect(url, function (err, client) {
       var db = client.db("users");
@@ -334,9 +334,97 @@ app.post("/registro", (req, res, next) => {
 });
 //  Codigo para cerrar sesion
 router.get("/logout", (req, res, next) => {
-  req.session.destroy();
+  delete req.session;
   res.redirect("/");
 });
+
+//  Codigo para cambiar username
+app.post("/cambiarusername", (req, res, next) => {
+  let newusername = req.body.newusername;
+  console.log(newusername, req.session.username);
+  MongoClient.connect(url, function (err, client) {
+    var db = client.db("users");
+    //Buscamos si ya hay un usuario registrado con ese nombre
+    db.collection("users").findOne({"username" : newusername}, function (findErr, result) {
+      if (findErr) throw findErr;
+      client.close();
+      //Si no hay ningun usuario con ese nombre en la BBDD:
+      if (!result){
+        MongoClient.connect(url, function (err, client) {
+          var db = client.db("users");
+          db.collection("users").updateOne({"username" : req.session.username}, {$set: {"username" : newusername}}, function (findErr, result) {
+            if (findErr) throw findErr;
+            //Redirigimos cambiando el username en la sesion
+            client.close();
+            req.session.username = newusername;
+            
+            req.session.save(function (err) {
+              let data = {
+                username: req.session.username
+                
+              };
+              res.render("cuenta", data); 
+            });
+          });
+        });
+      } else {
+        usernameIncorrecto = true;
+        res.render("cuenta", { usernameIncorrecto});
+      }
+     
+    });
+  });
+});
+
+//  Codigo para cambiar contraseña
+app.post("/cambiarpassword", (req, res, next) => {
+
+  let newpassword = req.body.newpassword;
+  let oldpassword = req.body.oldpassword;
+  
+  MongoClient.connect(url, function (err, client) {
+    var db = client.db("users");
+    
+    db.collection("users").findOne({"username" : req.session.username}, function (findErr, result) {
+      if (findErr) throw findErr;
+
+      client.close();
+      if(result){
+        if (result.password == oldpassword){
+          MongoClient.connect(url, function (err, client) {
+            var db = client.db("users");
+            db.collection("users").updateOne({"username" : req.session.username}, {$set: {"password" : newpassword}}, function (findErr, result) {
+              if (findErr) throw findErr;
+              client.close();
+            });
+              
+              
+            
+          });
+          req.session.save(function (err) {
+            let data = {
+              username: req.session.username,
+              passwordCambiada : true
+            };
+            res.render("cuenta", data);
+          });
+          
+          
+          
+        } else {
+          passwordIncorrecta = true;
+          res.render("cuenta", { passwordIncorrecta });
+        }
+      } else {
+        passwordIncorrecta = true;
+        res.render("cuenta", { passwordIncorrecta });
+      }
+      
+    });
+      
+  });
+});
+
 
 app.use(cookieParser());
 app.listen(5000, () => console.log("App listening on port 5000!"));
