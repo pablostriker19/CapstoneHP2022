@@ -13,7 +13,6 @@ const app = express();
 const router = express.Router();
 const url = "mongodb://localhost/test";
 const randomBytes = crypto.randomBytes;
-const data = require("../../data");
 
 const interval = {
   limit: 15,
@@ -24,11 +23,8 @@ const __dirname = path.dirname(__filename);
 const P = new Pokedex();
 
 var inicioSesionIncorrecto = false;
-<<<<<<< HEAD
 var registroIncorrecto= false;
-var sessionGuardada;
-=======
->>>>>>> 13453cac9d5c1487186b52a9772647623da9753a
+var fs;
 
 app.set("views", __dirname + "/src/views");
 app.set("view engine", "hbs");
@@ -46,29 +42,32 @@ app.use(
 );
 
 
-var i;
-P.getPokemonsList(interval).then((response) => {
-  console.log(response.results);
-  data.push(JSON.stringify(response.results)); //Pusheo al JSON data.js
-});
+/**********************************************/
+// Obtención del los 15 primeros pokemons de la API
+// Junto con su posterior carga en la Base de datos
+
+/**********************************************
+          let resApiPokemons;
+          P.getPokemonsList(interval).then((response) => {
+            console.log(response.results);
+            resApiPokemons = JSON.stringify(response.results);
+
+            fs.writeFile("pokemons.js", resApiPokemons);//Creo el JSON pokemons.js
+
+          });
 
 
-//  CONEXION CON MONGO
-<<<<<<< HEAD
-/*
-=======
->>>>>>> 13453cac9d5c1487186b52a9772647623da9753a
-MongoClient.connect(url, function (err, client) {
-  console.log("Conectado a MongoDB");
-  // Client returned
-  var db = client.db("test");
-  db.collection("pokemon").insertMany();
-  db.collection("pokemon").findOne({}, function (findErr, result) {
-    if (findErr) throw findErr;
-    //console.log(result.name);
-    client.close();
-  });
-});*/
+          //  CONEXION CON MONGO para cargar archivo el data.js
+          /*
+          MongoClient.connect(url, function (err, client) {
+            var db = client.db("test"); //nombre base de datos
+            db.collection("pokemon").insertMany("pokemons.js");
+            
+            client.close();
+          });*/
+
+/**********************************************/
+/**********************************************/
 
 //  -----------------------------------------------------------------------------------
 //  RENDERIZACION DE PAGINAS
@@ -85,30 +84,26 @@ app.get("/registro", (req, res, next) => {
 
 //  Pagina de inicio
 app.get("/inicio", (req, res, next) => {
-  //POKEMONS DE PRUEBA
-  const pokemons = [
-    {
-      name: "Charizard",
-      photo: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/006.png",
-      tipo: "Fuego",
-    },
-    {
-      name: "Blastoise",
-      photo: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/009.png",
-      tipo: "Agua",
-    },
-    {
-      name: "Pikachu",
-      photo: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/025.png",
-      tipo: "Electrico",
-    },
-  ];
+  
   if (!req.session.username) {
     res.redirect("/");
   } else {
+
+    MongoClient.connect(url, function (err, client) {
+      console.log("Conectado a MongoDB desde inicio");
+  
+      var db = client.db("users"); //Nombre de la BBDD
+      db.collection("users").find({pokemons}).toArray(function(err, pokeIniciales) {
+        if (err) throw err;
+        console.log(pokeIniciales); //Muestra el array devuelto
+        db.close();
+      });
+      client.close();
+    });
+
     let data = {
       username: req.session.username,
-      pokemons,
+      pokeIniciales,
     };
     res.render("inicio", data);
   }
@@ -116,37 +111,37 @@ app.get("/inicio", (req, res, next) => {
 
 //  Pagina de mis pokemons
 app.get("/mispokemons", (req, res, next) => {
-  //POKEMONS DE PRUEBA
-  const pokemons = [
-    {
-      name: "Charizard",
-      photo: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/006.png",
-      tipo: "Fuego",
-    },
-    {
-      name: "Blastoise",
-      photo: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/009.png",
-      tipo: "Agua",
-    },
-    {
-      name: "Pikachu",
-      photo: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/025.png",
-      tipo: "Electrico",
-    },
-  ];
+  
   if (!req.session.username) {
     res.redirect("/");
   } else {
+
+    MongoClient.connect(url, function (err, client) {
+      console.log("Conectado a MongoDB desde mispokemons");
+  
+      var db = client.db("users"); //Nombre de la BBDD
+      db.collection("users").find({pokemons}).toArray(function(err, pokeUsuario) {
+        if (err) throw err;
+        console.log(pokeUsuario); //Muestra el array devuelto
+        db.close();
+      });
+      client.close();
+    });
+
     let data = {
       username: req.session.username,
-      pokemons,
+      pokeUsuario,
     };
     res.render("mispokemons", data);
   }
 });
+
 //  Pagina añadir pokemons
 app.get("/maspokemons", (req, res, next) => {
+
+  
   //POKEMONS DE PRUEBA
+  /*
   const pokemons = [
     {
       name: "Bulbasaur",
@@ -198,13 +193,26 @@ app.get("/maspokemons", (req, res, next) => {
       photo: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/025.png",
       tipo: "Electrico",
     },
-  ];
+  ];*/
   if (!req.session.username) {
     res.redirect("/");
   } else {
+
+    MongoClient.connect(url, function (err, client) {
+      console.log("Conectado a MongoDB desde maspokemons");
+  
+      var db = client.db("users"); //Nombre de la BBDD
+      db.collection("pokemons").find({}).toArray(function(err, pokeLeidos) {
+        if (err) throw err;
+        console.log(pokeLeidos); //Muestra el array devuelto
+        db.close();
+      });
+      client.close();
+    });
+
     let data = {
       username: req.session.username,
-      pokemons,
+      pokeLeidos,
     };
     res.render("maspokemons", data);
   }
@@ -286,6 +294,7 @@ app.post("/login", (req, res, next) => {
       
   });
 });
+
 //  Codigo para registrarse
 app.post("/registro", (req, res, next) => {
     // Recogemos el username y password que ha introducido el usuario
@@ -294,11 +303,56 @@ app.post("/registro", (req, res, next) => {
     let pokeElegido;
 
     if(req.body.poke1){
-      pokeElegido="1" //Bulbasur
+
+      // Consultamos a la BBDD por el pokemon elegido.
+      MongoClient.connect(url, function (err, client) {
+        
+        var db = client.db("users"); //Nombre BBDD
+        
+        db.collection("pokemons").findOne({"name" : "bulbasur"}, function (findErr, result) {
+          if (findErr) throw findErr;
+          // db.collection("users").updateOne({item: "pokemons", result});
+          if(result){
+            pokeElegido = result;
+          }
+          db.close();
+        });
+        client.close();
+      });
+
     }else if(req.body.poke4){
-      pokeElegido="4" //Charmander
+
+      // Consultamos a la BBDD por el pokemon elegido.
+      MongoClient.connect(url, function (err, client) {
+        
+        var db = client.db("users"); //Nombre BBDD
+        
+        db.collection("pokemons").findOne({"name" : "charmander"}, function (findErr, result) {
+          if (findErr) throw findErr;
+          
+          if(result){
+            pokeElegido = result;
+          }
+          db.close();
+        });
+        client.close();
+      });
     }else{
-      pokeElegido="7" //Squirtle
+      // Consultamos a la BBDD por el pokemon elegido.
+      MongoClient.connect(url, function (err, client) {
+        
+        var db = client.db("users"); //Nombre BBDD
+        
+        db.collection("pokemons").findOne({"name" : "squirtle"}, function (findErr, result) {
+          if (findErr) throw findErr;
+          
+          if(result){
+            pokeElegido = result;
+          }
+          db.close();
+        });
+        client.close();
+      });
     }
 
     console.log(username);
