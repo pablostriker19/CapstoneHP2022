@@ -8,10 +8,12 @@ import crypto from "crypto";
 import cookieParser from "cookie-parser";
 import session from "express-session";
 import Pokedex from "pokedex-promise-v2";
+import fs from "fs";
+import { devNull } from "os";
 
 const app = express();
 const router = express.Router();
-const url = "mongodb://localhost/test";
+const url = "mongodb://localhost/27017";
 const randomBytes = crypto.randomBytes;
 
 
@@ -24,8 +26,6 @@ const __dirname = path.dirname(__filename);
 const P = new Pokedex();
 
 var inicioSesionIncorrecto = false;
-
-var fs;
 var registroIncorrecto= false;
 var passwordIncorrecta = false;
 var passwordCambiada = false;
@@ -54,25 +54,36 @@ app.use(
 // Obtención del los 15 primeros pokemons de la API
 // Junto con su posterior carga en la Base de datos
 
-/**********************************************
+//          Comentar y descomentar
+
+/**********************************************/
+          /*
           let resApiPokemons;
           P.getPokemonsList(interval).then((response) => {
             console.log(response.results);
             resApiPokemons = JSON.stringify(response.results);
 
-            fs.writeFile("pokemons.js", resApiPokemons);//Creo el JSON pokemons.js
+            fs.writeFile("pokemons.js", resApiPokemons, function(err, result) {
+              if(err) console.log('error', err);
+            });//Creo el JSON pokemons.js
 
           });
+          */
 
-
-          //  CONEXION CON MONGO para cargar archivo el data.js
           /*
+          //      IMPORTANTE. EJECUTAR ESTE CÓDIGO SOLO UNA VEZ
+          //  CONEXION CON MONGO para cargar archivo el pokemon.js
+          
+          let datosLeidos = fs.readFileSync("pokemons.js");
+          let dataParsed = JSON.parse(datosLeidos);
           MongoClient.connect(url, function (err, client) {
-            var db = client.db("test"); //nombre base de datos
-            db.collection("pokemon").insertMany("pokemons.js");
-            
-            client.close();
-          });*/
+            console.log("Conectado a MongoDB para cargar los Pokemons de la API");
+            var db = client.db("capstoneBD"); //nombre base de datos
+           
+            db.collection("pokemons").insertMany(dataParsed);
+          
+          });
+          */
 
 /**********************************************/
 /**********************************************/
@@ -97,14 +108,21 @@ app.get("/inicio", (req, res, next) => {
     res.redirect("/");
   } else {
 
+    let pokeIniciales;
+    
     MongoClient.connect(url, function (err, client) {
       console.log("Conectado a MongoDB desde inicio");
   
-      var db = client.db("users"); //Nombre de la BBDD
-      db.collection("users").find({pokemons}).toArray(function(err, pokeIniciales) {
+      var db = client.db("capstoneBD"); //Nombre de la BBDD
+      db.collection("users").findOne({"username": req.session.username}, function(err, result) {
+        console.log("");
         if (err) throw err;
-        console.log(pokeIniciales); //Muestra el array devuelto
-        db.close();
+        if(result){
+          console.log(result); //Muestra el array devuelto
+          pokeIniciales = result.pokemons.toArray();
+          
+        }else {console.log("No encuentro nada");}
+        
       });
       client.close();
     });
@@ -127,7 +145,7 @@ app.get("/mispokemons", (req, res, next) => {
     MongoClient.connect(url, function (err, client) {
       console.log("Conectado a MongoDB desde mispokemons");
   
-      var db = client.db("users"); //Nombre de la BBDD
+      var db = client.db("capstoneBD"); //Nombre de la BBDD
       db.collection("users").find({pokemons}).toArray(function(err, pokeUsuario) {
         if (err) throw err;
         console.log(pokeUsuario); //Muestra el array devuelto
@@ -209,7 +227,7 @@ app.get("/maspokemons", (req, res, next) => {
     MongoClient.connect(url, function (err, client) {
       console.log("Conectado a MongoDB desde maspokemons");
   
-      var db = client.db("users"); //Nombre de la BBDD
+      var db = client.db("capstoneBD"); //Nombre de la BBDD
       db.collection("pokemons").find({}).toArray(function(err, pokeLeidos) {
         if (err) throw err;
         console.log(pokeLeidos); //Muestra el array devuelto
@@ -277,10 +295,12 @@ app.post("/login", (req, res, next) => {
   // Consultamos a la BBDD por el usuario
   MongoClient.connect(url, function (err, client) {
     // Client returned
-    var db = client.db("users");
-    
+    var db = client.db("capstoneBD");
+    console.log("Conectado a la base de datos desde el post del login.");
+
     db.collection("users").findOne({"username" : username}, function (findErr, result) {
       if (findErr) throw findErr;
+      
       client.close();
       if(result){
         if (password == result.password){
@@ -308,13 +328,13 @@ app.post("/registro", (req, res, next) => {
     let username = req.body.inputUsername;
     let password = req.body.inputPassword;
     let pokeElegido;
-
+    /*
     if(req.body.poke1){
 
       // Consultamos a la BBDD por el pokemon elegido.
       MongoClient.connect(url, function (err, client) {
         
-        var db = client.db("users"); //Nombre BBDD
+        var db = client.db("capstoneBD"); //Nombre BBDD
         
         db.collection("pokemons").findOne({"name" : "bulbasur"}, function (findErr, result) {
           if (findErr) throw findErr;
@@ -332,7 +352,7 @@ app.post("/registro", (req, res, next) => {
       // Consultamos a la BBDD por el pokemon elegido.
       MongoClient.connect(url, function (err, client) {
         
-        var db = client.db("users"); //Nombre BBDD
+        var db = client.db("capstoneBD"); //Nombre BBDD
         
         db.collection("pokemons").findOne({"name" : "charmander"}, function (findErr, result) {
           if (findErr) throw findErr;
@@ -348,7 +368,7 @@ app.post("/registro", (req, res, next) => {
       // Consultamos a la BBDD por el pokemon elegido.
       MongoClient.connect(url, function (err, client) {
         
-        var db = client.db("users"); //Nombre BBDD
+        var db = client.db("capstoneBD"); 
         
         db.collection("pokemons").findOne({"name" : "squirtle"}, function (findErr, result) {
           if (findErr) throw findErr;
@@ -360,20 +380,22 @@ app.post("/registro", (req, res, next) => {
         });
         client.close();
       });
-    }
+    }*/
 
    
     // Consultamos a la BBDD por el usuario
     MongoClient.connect(url, function (err, client) {
-      var db = client.db("users");
+      var db = client.db("capstoneBD"); //Nombre BBDD
+
       //Buscamos si ya hay un usuario registrado con ese nombre
       db.collection("users").findOne({"username" : username}, function (findErr, result) {
         if (findErr) throw findErr;
         client.close();
-        //Si no hay ningun usuario con ese nombre en la BBDD:
-        if (!result){
+        
+        if (!result){ //Si no hay ningun usuario con ese nombre en la BBDD:
           MongoClient.connect(url, function (err, client) {
-            var db = client.db("users");
+            var db = client.db("capstoneBD");
+
             db.collection("users").insertOne({"username" : username, "password" : password, "pokemons": pokeElegido}, function (findErr, result) {
               if (findErr) throw findErr;
               //Redirigimos al inicio con la sesion iniciada
@@ -392,6 +414,7 @@ app.post("/registro", (req, res, next) => {
       });
     });
 });
+
 //  Codigo para cerrar sesion
 router.get("/logout", (req, res, next) => {
   delete req.session;
@@ -402,8 +425,9 @@ router.get("/logout", (req, res, next) => {
 app.post("/cambiarusername", (req, res, next) => {
   let newusername = req.body.newusername;
   console.log(newusername, req.session.username);
+  
   MongoClient.connect(url, function (err, client) {
-    var db = client.db("users");
+    var db = client.db("capstoneBD");
     //Buscamos si ya hay un usuario registrado con ese nombre
     db.collection("users").findOne({"username" : newusername}, function (findErr, result) {
       if (findErr) throw findErr;
@@ -411,7 +435,8 @@ app.post("/cambiarusername", (req, res, next) => {
       //Si no hay ningun usuario con ese nombre en la BBDD:
       if (!result){
         MongoClient.connect(url, function (err, client) {
-          var db = client.db("users");
+          var db = client.db("capstoneBD");
+
           db.collection("users").updateOne({"username" : req.session.username}, {$set: {"username" : newusername}}, function (findErr, result) {
             if (findErr) throw findErr;
             //Redirigimos cambiando el username en la sesion
@@ -443,7 +468,7 @@ app.post("/cambiarpassword", (req, res, next) => {
   let oldpassword = req.body.oldpassword;
   
   MongoClient.connect(url, function (err, client) {
-    var db = client.db("users");
+    var db = client.db("capstoneBD"); //Nombre BBDD
     
     db.collection("users").findOne({"username" : req.session.username}, function (findErr, result) {
       if (findErr) throw findErr;
