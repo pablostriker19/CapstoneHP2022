@@ -107,15 +107,15 @@ app.get("/inicio", (req, res, next) => {
   if (!req.session.username) {
     res.redirect("/");
   } else {
-
+    let username = req.session.username;
     let pokeIniciales;
     
     MongoClient.connect(url, function (err, client) {
       console.log("Conectado a MongoDB desde inicio");
   
       var db = client.db("capstoneBD"); //Nombre de la BBDD
-      db.collection("users").findOne({"username": req.session.username}, function(err, result) {
-        console.log("");
+      db.collection("users").findOne({"username": username}, function(err, result) {
+        console.log(result);
         if (err) throw err;
         if(result){
           console.log(result); //Muestra el array devuelto
@@ -165,61 +165,6 @@ app.get("/mispokemons", (req, res, next) => {
 //  Pagina añadir pokemons
 app.get("/maspokemons", (req, res, next) => {
 
-  
-  //POKEMONS DE PRUEBA
-  /*
-  const pokemons = [
-    {
-      name: "Bulbasaur",
-      photo: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/001.png",
-      tipo: "Planta",
-    },
-    {
-      name: "Ivysaur",
-      photo: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/002.png",
-      tipo: "Planta",
-    },
-    {
-      name: "Venusaur",
-      photo: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/003.png",
-      tipo: "Planta",
-    },
-    {
-      name: "Charmander",
-      photo: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/004.png",
-      tipo: "Fuego",
-    },
-    {
-      name: "Charmeleon",
-      photo: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/005.png",
-      tipo: "Fuego",
-    },
-    {
-      name: "Charizard",
-      photo: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/006.png",
-      tipo: "Fuego",
-    },
-    {
-      name: "Squirtle",
-      photo: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/007.png",
-      tipo: "Agua",
-    },
-    {
-      name: "Wartortle",
-      photo: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/008.png",
-      tipo: "Agua",
-    },
-    {
-      name: "Blastoise",
-      photo: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/009.png",
-      tipo: "Agua",
-    },
-    {
-      name: "Pikachu",
-      photo: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/025.png",
-      tipo: "Electrico",
-    },
-  ];*/
   if (!req.session.username) {
     res.redirect("/");
   } else {
@@ -328,65 +273,67 @@ app.post("/registro", (req, res, next) => {
     let username = req.body.inputUsername;
     let password = req.body.inputPassword;
     let pokeElegido;
-    /*
-    if(req.body.poke1){
+
+    if(req.body.bulbasaur){
 
       // Consultamos a la BBDD por el pokemon elegido.
       MongoClient.connect(url, function (err, client) {
-        
+        console.log("Conecto a la BD en busca de bulbasaur.");
         var db = client.db("capstoneBD"); //Nombre BBDD
         
-        db.collection("pokemons").findOne({"name" : "bulbasur"}, function (findErr, result) {
+        db.collection("pokemons").findOne({"name" : "bulbasaur"}, function (findErr, result) {
+          console.log("Query de bulbasaur.");
+          console.log(result);
           if (findErr) throw findErr;
           // db.collection("users").updateOne({item: "pokemons", result});
           if(result){
             pokeElegido = result;
           }
-          db.close();
+          
         });
         client.close();
       });
 
-    }else if(req.body.poke4){
+    }else if(req.body.charmander){
 
       // Consultamos a la BBDD por el pokemon elegido.
       MongoClient.connect(url, function (err, client) {
-        
+        console.log("Conecto a la BD en busca de charmander.");
         var db = client.db("capstoneBD"); //Nombre BBDD
         
-        db.collection("pokemons").findOne({"name" : "charmander"}, function (findErr, result) {
+        db.collection("pokemons").findOne({name : "charmander"}, function (findErr, result) {
           if (findErr) throw findErr;
           
           if(result){
             pokeElegido = result;
           }
-          db.close();
+          
         });
         client.close();
       });
-    }else{
+    }else if(req.body.squirtle){
       // Consultamos a la BBDD por el pokemon elegido.
       MongoClient.connect(url, function (err, client) {
-        
+        console.log("Conecto a la BD en busca de squirtle.");
         var db = client.db("capstoneBD"); 
         
-        db.collection("pokemons").findOne({"name" : "squirtle"}, function (findErr, result) {
+        db.collection("pokemons").findOne({name : "squirtle"}, function (findErr, result) {
           if (findErr) throw findErr;
           
           if(result){
             pokeElegido = result;
           }
-          db.close();
+        
         });
         client.close();
       });
-    }*/
+    }
 
    
     // Consultamos a la BBDD por el usuario
     MongoClient.connect(url, function (err, client) {
       var db = client.db("capstoneBD"); //Nombre BBDD
-
+      console.log("Conecto a la BD en busca del user en registro.");
       //Buscamos si ya hay un usuario registrado con ese nombre
       db.collection("users").findOne({"username" : username}, function (findErr, result) {
         if (findErr) throw findErr;
