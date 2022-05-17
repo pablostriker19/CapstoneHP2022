@@ -53,7 +53,7 @@ MongoClient.connect(url, function (err, client) {
   console.log("Conectado a MongoDB");
   // Client returned
   var db = client.db("test");
-  db.collection("pokemon").insertMany(data);
+  db.collection("pokemon").insertMany();
   db.collection("pokemon").findOne({}, function (findErr, result) {
     if (findErr) throw findErr;
     //console.log(result.name);
