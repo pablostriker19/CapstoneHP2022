@@ -343,6 +343,7 @@ app.post("/registro", (req, res, next) => {
     );
   });
 });
+
 //  Codigo para cerrar sesion
 router.get("/logout", (req, res, next) => {
   delete req.session;
@@ -353,8 +354,9 @@ router.get("/logout", (req, res, next) => {
 app.post("/cambiarusername", (req, res, next) => {
   let newusername = req.body.newusername;
   console.log(newusername, req.session.username);
+
   MongoClient.connect(url, function (err, client) {
-    var db = client.db("users");
+    var db = client.db("capstoneBD");
     //Buscamos si ya hay un usuario registrado con ese nombre
     db.collection("users").findOne(
       { username: newusername },
