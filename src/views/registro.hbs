@@ -22,24 +22,31 @@
                         <div class="card-body p-5">
                             <h2 class="text-uppercase text-center mb-5">Registro</h2>
 
-                            <form name="login" action="inicio" method="post">
+                            <form name="login" action="registro" method="POST">
 
                                 <div class="form-outline mb-4">
                                     <input
                                         type="text"
+                                        name="inputUsername"
                                         class="form-control form-control-lg"
-                                        id="username"
+                                        id="inputUsername"
                                         placeholder="Nombre de usuario"
-                                        required/>
+                                        required autofocus/>
                                 </div>
                                 <div class="form-outline mb-4">
                                     <input
                                         type="password"
+                                        name="inputPassword"
                                         class="form-control form-control-lg"
-                                        id="password"
+                                        id="inputPassword"
                                         placeholder="Contraseña"
                                         required/>
                                 </div>
+
+                                {{#if registroIncorrecto}}
+                                    <p aria-atomic="true" style="color: #ff0000;" >Ya existe un usuario con ese nombre!</p>
+                                {{/if}}
+
 
                                 
                                 <!-- Div para elegir pokemon inciia-->
@@ -53,13 +60,13 @@
                                 <div class="d-flex justify-content-around">
                                   
                                   <div>
-                                    <input type="image" style="border: 1px solid #161616;" src="https://assets.pokemon.com/assets/cms2/img/pokedex/full/001.png" width="200" height="200"/>
+                                    <input type="image" name="poke1" style="border: 1px solid #161616;" src="https://assets.pokemon.com/assets/cms2/img/pokedex/full/001.png" width="200" height="200"/>
                                   </div>
                                   <div>
-                                    <input type="image" style="border: 1px solid #161616;" src="https://assets.pokemon.com/assets/cms2/img/pokedex/full/004.png" width="200" height="200"/>
+                                    <input type="image" name="poke4" style="border: 1px solid #161616;" src="https://assets.pokemon.com/assets/cms2/img/pokedex/full/004.png" width="200" height="200"/>
                                   </div>
                                   <div>
-                                    <input type="image" style="border: 1px solid #161616;" src="https://assets.pokemon.com/assets/cms2/img/pokedex/full/007.png" width="200" height="200"/>
+                                    <input type="image" name="poke7" style="border: 1px solid #161616;" src="https://assets.pokemon.com/assets/cms2/img/pokedex/full/007.png" width="200" height="200"/>
                                   </div>
                                     
                                 </div>
