@@ -485,6 +485,16 @@ app.post("/cambiarpassword", (req, res, next) => {
   });
 });
 
+//  Codigo para borrar cuenta
+app.get("/borrarcuenta", (req, res, next) => {
+  MongoClient.connect(url, function (err, client) {
+    var db = client.db("users");
+    db.users.remove({"username" : req.session.username}, function (findErr, result) {
+      if (findErr) throw findErr;
+      client.close();
+    });
+  });
+});
 
 app.use(cookieParser());
 app.listen(5000, () => console.log("App listening on port 5000!"));
