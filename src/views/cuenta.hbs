@@ -1,11 +1,11 @@
 <script language="JavaScript">
 function confirmar(){
-    if (confirm('¿Seguro que quieres guardar?')){
+    if (confirm('¿Seguro que quieres cambiar tu nombre?')){
        document.cambiarusername.submit()
     }
 }
 function confirmarpassword(){
-    if (confirm('¿Seguro que quieres guardar?')){
+    if (confirm('¿Seguro que quieres cambiar tu contraseña?')){
        document.cambiarpassword.submit()
     }
 }
@@ -88,7 +88,7 @@ function confirmar_borrado(){
                                 </div>
 
                                 <div class="col-md-2">
-                                    <button class="btn btn-primary mt-4" type="submit">Guardar</button>
+                                    <button class="btn btn-primary mt-4" type="submit" onclick="confirmarpassword()">Guardar</button>
                                 </div>
                             </div>
                         </form>
@@ -101,7 +101,7 @@ function confirmar_borrado(){
 
                                 <h4 class="card-title">Borrar cuenta:</h4>
                                 <form action="/borrarcuenta" method="POST">
-                                    <button class="btn btn-danger ml-4" onclick="confirmarpassword()" type="submit">Borrar cuenta</button>
+                                    <button class="btn btn-danger ml-4" onclick="confirmar_borrado()" type="submit">Borrar cuenta</button>
                                 </form>
                             
                         </div>

@@ -279,11 +279,7 @@ app.post("/registro", (req, res, next) => {
     db.collection("pokemons").findOne(
       { name: "bulbasaur" },
       function (findErr, result) {
-        console.log("Query de bulbasaur.");
-        console.log(result);
-
         if (findErr) throw findErr;
-
         // db.collection("users").updateOne({item: "pokemons", result});
         if (result) {
           pokeElegido = result;
@@ -318,7 +314,7 @@ app.post("/registro", (req, res, next) => {
 
   // Consultamos a la BBDD por el usuario
 
-  console.log("Conecto a la BD en busca del user en registro.");
+
   //Buscamos si ya hay un usuario registrado con ese nombre
   db.collection("users").findOne(
     { username: username },
