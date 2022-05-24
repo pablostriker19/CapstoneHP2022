@@ -414,19 +414,18 @@ app.post("/cambiarpassword", (req, res, next) => {
   
 });
 
-<<<<<<< HEAD
+
+
 //  Codigo para borrar cuenta
 app.get("/borrarcuenta", (req, res, next) => {
-  MongoClient.connect(url, function (err, client) {
-    var db = client.db("users");
-    db.users.remove({"username" : req.session.username}, function (findErr, result) {
-      if (findErr) throw findErr;
-      client.close();
-    });
-  });
+    console.log(req.session.username);
+    db.collection("users").deleteOne({"username" : req.session.username});
+    delete req.session;
+    res.render("/");
+    
+
 });
 
-=======
->>>>>>> 75ab56dc2ded36e3cbaa53f7802a26a9a9b0f5b3
+
 app.use(cookieParser());
 app.listen(5000, () => console.log("App listening on port 5000!"));
