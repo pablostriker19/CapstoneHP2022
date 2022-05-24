@@ -15,10 +15,17 @@
                                         class="form-control"
                                         name="newusername"
                                         id="newusername"
-                                        placeholder={{username}}
+                                        
                                         required="required"/>
-                                    
-                              
+
+                                    {{#if usernameIncorrecto}}
+                                        <br>
+                                        <p aria-atomic="true" style="color: #ff0000;" >El nombre introducido no es correcto. Puede que ya haya un usuario con ese nombre...</p>
+                                    {{/if}}
+                                    {{#if usernameCambiado}}
+                                        <br>
+                                        <p aria-atomic="true" style="color: #2d9c11;" >El nombre de usuario ha sido cambiado con éxito!</p>
+                                    {{/if}}
 
                             </div>
                             <div class="col-md-2">
@@ -50,22 +57,31 @@
                                             id="newpassword"
                                             placeholder="Nueva contraseña"
                                             required="required"/>
-                                    </form>
 
+                                    {{#if passwordCambiada}}
+                                        <br>
+                                        <p aria-atomic="true" style="color: #2d9c11;" >Contraseña cambiada con éxito!</p>
+                                    {{/if}}
+                                    {{#if passwordIncorrecta}}
+                                        <br>
+                                        <p aria-atomic="true" style="color: #ff0000;" >Contraseña no cambiada. Compruebe la antigua contraseña.</p>
+                                    {{/if}}
                                 </div>
+
                                 <div class="col-md-2">
                                     <button class="btn btn-primary mt-4" type="submit">Guardar</button>
-
                                 </div>
                             </div>
-                            </form>
+                        </form>
                     </div>
+                                
+                            
                     <br><br>
                     <div class="card-body">
                         <div class="row d-flex justify-content-center text-center">
 
                                 <h4 class="card-title">Borrar cuenta:</h4>
-                                <form action="/">
+                                <form action="/borrarcuenta" method="POST">
                                     <button class="btn btn-danger ml-4" type="submit">Borrar cuenta</button>
                                 </form>
                             
