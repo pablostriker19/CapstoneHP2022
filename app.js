@@ -138,9 +138,10 @@ app.get("/mispokemons", (req, res, next) => {
     res.redirect("/");
   } else {
     let username = req.session.username;
-
+    /*
     let pokeUsuario = db.collection("users").findOne({ username: req.session.username });
     console.log(pokeUsuario);
+    */
     db.collection("users").findOne({ username: req.session.username }, function (err, result) {
       if (err) throw err;
         
@@ -163,6 +164,22 @@ app.get("/maspokemons", (req, res, next) => {
   if (!req.session.username) {
     res.redirect("/");
   } else {
+
+    let username = req.session.username;
+    db.collection("users").findOne({ username: req.session.username }, function (err, result) {
+      if (err) throw err;
+        
+      //console.log(result.pokemons); //Muestra el array devuelto
+      let dataPoke = [
+        result.pokemons
+      ];
+      
+      console.log(dataPoke);
+        
+      res.render("maspokemons", {dataPoke, username});
+      
+    });
+
     let pokeLeidos;
     db.collection("pokemons").find({}, function (err, result) {
         if (err) throw err;
@@ -364,6 +381,7 @@ app.post("/cambiarusername", (req, res, next) => {
 
               req.session.save(function (err) {
                 let data = {
+                  usernameCambiado: true,
                   username: req.session.username,
                 };
                 res.render("cuenta", data);
@@ -414,18 +432,17 @@ app.post("/cambiarpassword", (req, res, next) => {
   
 });
 
-
-
 //  Codigo para borrar cuenta
-app.get("/borrarcuenta", (req, res, next) => {
-    console.log(req.session.username);
-    db.collection("users").deleteOne({"username" : req.session.username});
-    delete req.session;
-    res.render("/");
+app.post("/borrarcuenta", (req, res, next) => {
     
+    db.collection("users").deleteOne({"username" : req.session.username}, function (findErr, result) {
+      if (findErr) throw findErr;
 
+      delete req.session;
+      res.redirect("/");
+    });
+  
 });
-
 
 app.use(cookieParser());
 app.listen(5000, () => console.log("App listening on port 5000!"));
