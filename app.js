@@ -175,7 +175,7 @@ app.get("/inicio", (req, res, next) => {
 
         if (result) {
           //Asigno los pokemons que tiene el usuario en la BD
-          pokeIniciales = [result.pokemons];
+          pokeIniciales = result.pokemons;
           nPokemons = pokeIniciales.length;
           fotoPerfil = pokeIniciales[0].sprite;
         }
@@ -201,10 +201,7 @@ app.get("/mispokemons", (req, res, next) => {
       function (err, result) {
         if (err) throw err;
 
-        //console.log(result.pokemons); //Muestra el array devuelto
         let dataPokes = result.pokemons;
-
-        console.log(dataPokes);
 
         res.render("mispokemons", { dataPokes, username });
       }
@@ -224,7 +221,7 @@ app.post("/anadirpokemon", (req, res, next) => {
         if (err) throw err;
         db.collection("users").updateOne(
           { username: req.session.username },
-          { $push: { pokemons: result } }
+          { $addToSet: { pokemons: result } }
         );
         res.redirect("mispokemons");
       }

@@ -1,25 +1,30 @@
 
 <div class="col-md-3 mt-4">
-  <div class="card w-70" >
+  <div class="card w-80" >
     <img class="card-img-top" style="border: 2px solid #161616;" src="{{sprite}}" alt="{{name}}"/>
     
-    <div class="card-body text-center">
+    <div class="card-body justify-content-center">
       
-      <h4 class="card-title"><b>{{name}}</b></h4>
-      <p class="card-text">Tipo: <i>{{type}}</i></p>
+      <h4 class="card-title text-center"><b>{{name}}</b></h4>
+      <p class="card-text text-center">Tipo: <i>{{type}}</i></p>
       
-    	<div class="container-fluid"> 
-    		<div class="align-items-center">
-          <h5>{{type}}</h5>
-    			<br>
-
-          <div class="col text-center">
-            <form name="cambiarusername" id="cambiarusername" action="/borrarpokemon" method="POST">
-    				  <button class="btn btn-success regular-button" name="name" value="{{name}}" type="submit">Eliminar</button>
-    			  </form>
-          </div>	
-    		</div> 
-    	</div>    
+    	
+    	<div class="d-flex justify-content-center ">
+        <br>
+    		<div class="col-sm-5">
+          <form action="/verpokemon" method="POST">
+    			  <button class="btn btn-primary regular-button" name="name" value="{{name}}" type="submit">Ver</button>
+    			</form>
+        </div>
+          
+        <div class="col-sm-5">
+          <form action="/borrarpokemon" method="POST">
+            <button class="btn btn-danger regular-button" name="name" value="{{name}}" type="submit">Eliminar</button>
+          </form>
+        </div>
+        
+    	</div> 
+    	    
     </div>
   </div>
 </div>
