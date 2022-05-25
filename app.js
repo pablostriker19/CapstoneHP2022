@@ -1,6 +1,6 @@
 import express from "express";
 import hbs from "hbs";
-import path from "path";
+import path, { parse } from "path";
 import { fileURLToPath } from "url";
 import bodyParser from "body-parser";
 import { MongoClient } from "mongodb";
@@ -10,6 +10,7 @@ import session from "express-session";
 import Pokedex from "pokedex-promise-v2";
 import fs from "fs";
 import { devNull } from "os";
+import { ADDRGETNETWORKPARAMS } from "dns";
 
 const app = express();
 const router = express.Router();
@@ -23,6 +24,7 @@ const interval = {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const P = new Pokedex();
+const listaPokemons = [];
 
 var inicioSesionIncorrecto = false;
 var registroIncorrecto = false;
@@ -30,9 +32,11 @@ var passwordIncorrecta = false;
 var passwordCambiada = false;
 var usernameCambiado = false;
 var usernameIncorrecto = false;
-var sessionGuardada;
+var primeraVez = false;
 
 let db;
+let resApiPokemons;
+let parseo;
 
 app.set("views", __dirname + "/src/views");
 app.set("view engine", "hbs");
@@ -50,40 +54,77 @@ app.use(
 );
 
 /**********************************************/
-// Obtención del los 15 primeros pokemons de la API
+// Obtención del los 20 primeros pokemons de la API
 // Junto con su posterior carga en la Base de datos
 
 //          Comentar y descomentar
 /**********************************************/
+if(primeraVez){
 
-          const listaPokemons = [];
-          //Se obtiene la lista de los pokemons, solo utilizaremos su nombre.
-          P.getPokemonsList(interval).then((respuestaAPI) => {
-            //console.log(response.results[0].name);
-            //resApiPokemons = JSON.stringify(respuestaAPI.results);
-            console.log(respuestaAPI.results.length);
-            
-            //respuestaAPI.results.length
-            for(let i = 0; i < 6; i++ ){ //Recorro la lista de los pokemons
-              P.getPokemonByName(respuestaAPI.results[i].name).then((pokemonBuscado) => {
-                console.log(pokemonBuscado.name, pokemonBuscado.height, pokemonBuscado.weight, pokemonBuscado.types[0].type.name);
+  primeraVez = true;
+  P.getPokemonsList(interval).then((respuestaAPI) => {
+  //console.log(response.results[0].name);
+  //resApiPokemons = JSON.stringify(respuestaAPI.results);
+  //console.log(respuestaAPI.results);
+  
+  
+  for(let i = 0; i < respuestaAPI.results.length; i++ ){ //Recorro la lista de los pokemons
+    
+    P.getPokemonByName(respuestaAPI.results[i].name).then((pokemonBuscado) => {
 
-                listaPokemons.push(pokemonBuscado);
-              });
-              
-            }
+      //console.log(pokemonBuscado.name, pokemonBuscado.id, pokemonBuscado.types[0].type.name);
+
+      listaPokemons.push({ 
+        "id" : pokemonBuscado.id,
+        "name"   :pokemonBuscado.name,
+        "type"  : pokemonBuscado.types[0].type.name,
+        "sprite"    : pokemonBuscado.sprites.front_default
+      });
+      
+      //Ordenamos la lista a cada pokemon obtenido
+      listaPokemons.sort(function (a, b) {
+        if (a.id > b.id) {
+          return 1;
+        }
+        if (a.id < b.id) {
+          return -1;
+        }
+        // a must be equal to b
+        return 0;
+      });
+
+      resApiPokemons = JSON.stringify(listaPokemons);
+      
+      //console.log(resApiPokemons);
+      
+      //fs.createWriteStream("pokemons.json")
+      if( i == 19){
+        console.log("He entrado en el if chapuza")
+        fs.writeFile("pokemons.json", resApiPokemons, function(err, result) {
+          if(err) console.log('error', err);
           
-            
-            /*
-            fs.writeFile("pokemons.js", resApiPokemons, function(err, result) {
-              if(err) console.log('error', err);
-            });//Creo el JSON pokemons.js
-            */
-          });
-          
+        });
+      }
+
+    });
+   console.log(i);
+    
+  } // fin del for
+  
+
+  /*
+  fs.writeFile("pokemons.json", parseo, function(err, result) {
+    if(err) console.log('error', err);
+  });//Creo el JSON pokemons.js
+  */
+});
+} 
+
+//Se obtiene la lista de los pokemons, solo utilizaremos su nombre.
+
 
 /*
-          //      IMPORTANTE. EJECUTAR ESTE CÓDIGO SOLO UNA VEZ
+          //  IMPORTANTE. EJECUTAR ESTE CÓDIGO SOLO UNA VEZ
           //  CONEXION CON MONGO para cargar archivo el pokemon.js
           
           let datosLeidos = fs.readFileSync("pokemons.js");
@@ -322,9 +363,6 @@ app.post("/registro", (req, res, next) => {
       }
     );
   }
-
-  // Consultamos a la BBDD por el usuario
-
 
   //Buscamos si ya hay un usuario registrado con ese nombre
   db.collection("users").findOne(
