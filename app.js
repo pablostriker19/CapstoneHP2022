@@ -59,69 +59,71 @@ app.use(
 
 //          Comentar y descomentar
 /**********************************************/
-if(primeraVez){
-
+/*
+let a = 0;
+if (!primeraVez) {
   primeraVez = true;
   P.getPokemonsList(interval).then((respuestaAPI) => {
-  //console.log(response.results[0].name);
-  //resApiPokemons = JSON.stringify(respuestaAPI.results);
-  //console.log(respuestaAPI.results);
-  
-  
-  for(let i = 0; i < respuestaAPI.results.length; i++ ){ //Recorro la lista de los pokemons
-    
-    P.getPokemonByName(respuestaAPI.results[i].name).then((pokemonBuscado) => {
+    //console.log(response.results[0].name);
+    //resApiPokemons = JSON.stringify(respuestaAPI.results);
+    //console.log(respuestaAPI.results);
 
-      //console.log(pokemonBuscado.name, pokemonBuscado.id, pokemonBuscado.types[0].type.name);
+    for (let i = 0; i < respuestaAPI.results.length; i++) {
+      //Recorro la lista de los pokemons
 
-      listaPokemons.push({ 
-        "id" : pokemonBuscado.id,
-        "name"   :pokemonBuscado.name,
-        "type"  : pokemonBuscado.types[0].type.name,
-        "sprite"    : pokemonBuscado.sprites.front_default
-      });
-      
-      //Ordenamos la lista a cada pokemon obtenido
-      listaPokemons.sort(function (a, b) {
-        if (a.id > b.id) {
-          return 1;
+      P.getPokemonByName(respuestaAPI.results[i].name).then(
+        (pokemonBuscado) => {
+          //console.log(pokemonBuscado.name, pokemonBuscado.id, pokemonBuscado.types[0].type.name);
+
+          listaPokemons.push({
+            id: pokemonBuscado.id,
+            name: pokemonBuscado.name,
+            type: pokemonBuscado.types[0].type.name,
+            sprite: pokemonBuscado.sprites.front_default,
+          });
+          //Ordenamos la lista a cada pokemon obtenido
+          listaPokemons.sort(function (a, b) {
+            if (a.id > b.id) {
+              return 1;
+            }
+            if (a.id < b.id) {
+              return -1;
+            }
+            // a must be equal to b
+            return 0;
+          });
+
+          resApiPokemons = JSON.stringify(listaPokemons);
+
+          //console.log(resApiPokemons);
+
+          //fs.createWriteStream("pokemons.json")
+          if (a == 19) {
+            console.log("He entrado en el if chapuza");
+            fs.writeFile(
+              "pokemons.json",
+              resApiPokemons,
+              function (err, result) {
+                if (err) console.log("error", err);
+              }
+            );
+          }
+          a++;
         }
-        if (a.id < b.id) {
-          return -1;
-        }
-        // a must be equal to b
-        return 0;
-      });
+      );
+      console.log(i);
+    } // fin del for
 
-      resApiPokemons = JSON.stringify(listaPokemons);
-      
-      //console.log(resApiPokemons);
-      
-      //fs.createWriteStream("pokemons.json")
-      if( i == 19){
-        console.log("He entrado en el if chapuza")
-        fs.writeFile("pokemons.json", resApiPokemons, function(err, result) {
-          if(err) console.log('error', err);
-          
-        });
-      }
-
-    });
-   console.log(i);
-    
-  } // fin del for
-  
-
-  /*
+    /*
   fs.writeFile("pokemons.json", parseo, function(err, result) {
     if(err) console.log('error', err);
   });//Creo el JSON pokemons.js
-  */
-});
-} 
+  
+  });
+}
+*/
 
 //Se obtiene la lista de los pokemons, solo utilizaremos su nombre.
-
 
 /*
           //  IMPORTANTE. EJECUTAR ESTE CÓDIGO SOLO UNA VEZ
@@ -148,6 +150,17 @@ MongoClient.connect(url, function (err, client) {
   db = client.db("capstoneBD"); //Nombre de la BBDD
 });
 
+//  CARGAR POKEMONS EN MONGO, SOLO 1 VEZ
+/*
+MongoClient.connect(url, function (err, client) {
+  console.log("Conectado a MongoDB para cargar los Pokemons de la API");
+  var db = client.db("capstoneBD"); //nombre base de datos
+
+  let datosLeidos = fs.readFileSync("pokemons.json");
+  let dataParsed = JSON.parse(datosLeidos);
+  db.collection("pokemons").insertMany(dataParsed);
+});
+*/
 //  -----------------------------------------------------------------------------------
 //  RENDERIZACION DE PAGINAS
 
@@ -169,7 +182,9 @@ app.get("/inicio", (req, res, next) => {
     let username = req.session.username;
     let pokeIniciales;
 
-    db.collection("users").findOne({ username: username },function (err, result) {
+    db.collection("users").findOne(
+      { username: username },
+      function (err, result) {
         if (err) throw err;
 
         if (result) {
@@ -197,54 +212,75 @@ app.get("/mispokemons", (req, res, next) => {
     let pokeUsuario = db.collection("users").findOne({ username: req.session.username });
     console.log(pokeUsuario);
     */
-    db.collection("users").findOne({ username: req.session.username }, function (err, result) {
-      if (err) throw err;
-        
-      //console.log(result.pokemons); //Muestra el array devuelto
-      let dataPoke = [
-        result.pokemons
-      ];
-      
-      console.log(dataPoke);
-        
-      res.render("mispokemons", {dataPoke, username});
-      
-    });
-    
+    db.collection("users").findOne(
+      { username: req.session.username },
+      function (err, result) {
+        if (err) throw err;
+
+        //console.log(result.pokemons); //Muestra el array devuelto
+        let dataPoke = [result.pokemons];
+
+        console.log(dataPoke);
+
+        res.render("mispokemons", { dataPoke, username });
+      }
+    );
   }
 });
 
 //  Pagina añadir pokemons
+app.post("/anadirpokemon", (req, res, next) => {
+  if (!req.session.username) {
+    res.redirect("/");
+  } else {
+    console.log(req.body.name);
+    db.collection("pokemons").findOne(
+      { name: req.body.name },
+      function (err, result) {
+        if (err) throw err;
+
+        const query = { name: req.session.name };
+        const updateDocument = {
+          $push: { pokemons: req.body.name },
+        };
+        db.collection("users").insertOne(query, updateDocument);
+
+        //console.log(dataPoke);
+        let dataPoke = db
+          .collection("users")
+          .findOne({ username: req.session.username }, function (err, result) {
+            if (err) throw err;
+
+            //console.log(result.pokemons); //Muestra el array devuelto
+            let dataPokes = [result.pokemons];
+
+            console.log(dataPokes);
+
+            res.render("mispokemons", { dataPokes, username });
+          });
+        //res.render("anadirpokemon", { dataPoke, username });
+      }
+    );
+  }
+});
+
+//  Pagina vert todos los pokemons
 app.get("/maspokemons", (req, res, next) => {
   if (!req.session.username) {
     res.redirect("/");
   } else {
     let username = req.session.username;
-    /*db.collection("pokemons").find({}, function (err, result) {
-      if (err) throw err;
-        
-      //console.log(result.pokemons); //Muestra el array devuelto
-      console.log("Obtengo los pokemons en masPokemons");
-      console.log(result.pokemons);
-      let dataPoke = [
-        result.pokemons
-      ];
-      
-      console.log(dataPoke);
-        
-      res.render("maspokemons", {dataPoke, username});
-      
-    });*/
-    //let poke = db.collection("pokemons").find().toArray();
-    let poke = db.collection("pokemons").finOne({name: "bulbasaur"});
-    console.log("Obtengo los pokemons en masPokemons");
-    console.log(poke.name);
-    let dataPoke = [
-      poke
-    ];
-    res.render("maspokemons", {dataPoke, username});
-
-  
+    let dataPokes;
+    db.collection("pokemons")
+      .find({})
+      .toArray(function (err, result) {
+        if (err) {
+          res.send(err);
+        } else {
+          dataPokes = result;
+          res.render("maspokemons", { dataPokes, username });
+        }
+      });
   }
 });
 
@@ -407,7 +443,6 @@ app.post("/cambiarusername", (req, res, next) => {
   db.collection("users").findOne(
     { username: newusername },
     function (findErr, result) {
-      
       if (findErr) throw findErr;
 
       //Si no hay ningun usuario con ese nombre en la BBDD:
@@ -447,46 +482,47 @@ app.post("/cambiarpassword", (req, res, next) => {
   let newpassword = req.body.newpassword;
   let oldpassword = req.body.oldpassword;
 
+  db.collection("users").findOne(
+    { username: req.session.username },
+    function (findErr, result) {
+      if (findErr) throw findErr;
 
-    db.collection("users").findOne(
-      { username: req.session.username },
-      function (findErr, result) {
-        if (findErr) throw findErr;
-
-        if (result) {
-          if (result.password == oldpassword) {
-            
-            db.collection("users").updateOne({ username: req.session.username }, { $set: { password: newpassword } });
-            req.session.save(function (err) {
-              let data = {
-                username: req.session.username,
-                passwordCambiada: true,
-              };
-              res.render("cuenta", data);
-            });
-          } else {
-            passwordIncorrecta = true;
-            res.render("cuenta", { passwordIncorrecta });
-          }
+      if (result) {
+        if (result.password == oldpassword) {
+          db.collection("users").updateOne(
+            { username: req.session.username },
+            { $set: { password: newpassword } }
+          );
+          req.session.save(function (err) {
+            let data = {
+              username: req.session.username,
+              passwordCambiada: true,
+            };
+            res.render("cuenta", data);
+          });
         } else {
           passwordIncorrecta = true;
           res.render("cuenta", { passwordIncorrecta });
         }
+      } else {
+        passwordIncorrecta = true;
+        res.render("cuenta", { passwordIncorrecta });
       }
-    );
-  
+    }
+  );
 });
 
 //  Codigo para borrar cuenta
 app.post("/borrarcuenta", (req, res, next) => {
-    
-    db.collection("users").deleteOne({"username" : req.session.username}, function (findErr, result) {
+  db.collection("users").deleteOne(
+    { username: req.session.username },
+    function (findErr, result) {
       if (findErr) throw findErr;
 
       delete req.session;
       res.redirect("/");
-    });
-  
+    }
+  );
 });
 
 app.use(cookieParser());
