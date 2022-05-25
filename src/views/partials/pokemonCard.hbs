@@ -8,13 +8,18 @@
       <h4 class="card-title"><b>{{name}}</b></h4>
       <p class="card-text">Tipo: <i>{{type}}</i></p>
       
-      <div class="justify-content-around">
+    	<div class="container-fluid"> 
+    		<div class="align-items-center">
+          <h5>{{type}}</h5>
+    			<br>
 
-        <a href="/verpokemon" class="btn btn-success"> Ver </a>
-
-        <a  href="#" class="btn btn-danger"> Eliminar </a>
-
-      </div>
+          <div class="col text-center">
+            <form name="cambiarusername" id="cambiarusername" action="/borrarpokemon" method="POST">
+    				  <button class="btn btn-success regular-button" name="name" value="{{name}}" type="submit">Eliminar</button>
+    			  </form>
+          </div>	
+    		</div> 
+    	</div>    
     </div>
   </div>
 </div>

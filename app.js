@@ -202,11 +202,11 @@ app.get("/mispokemons", (req, res, next) => {
         if (err) throw err;
 
         //console.log(result.pokemons); //Muestra el array devuelto
-        let dataPoke = [result.pokemons];
+        let dataPokes = result.pokemons;
 
-        console.log(dataPoke);
+        console.log(dataPokes);
 
-        res.render("mispokemons", { dataPoke, username });
+        res.render("mispokemons", { dataPokes, username });
       }
     );
   }
@@ -222,13 +222,32 @@ app.post("/anadirpokemon", (req, res, next) => {
       { name: req.body.name },
       function (err, result) {
         if (err) throw err;
+        db.collection("users").updateOne(
+          { username: req.session.username },
+          { $push: { pokemons: result } }
+        );
+        res.redirect("mispokemons");
+      }
+    );
+  }
+});
 
-        const query = { name: req.session.name };
-        const updateDocument = {
-          $push: { pokemons: req.body.name },
-        };
-        db.collection("users").insertOne(query, updateDocument);
+//borrar pokemon
+app.post("/borrarpokemon", (req, res, next) => {
+  if (!req.session.username) {
+    res.redirect("/");
+  } else {
+    console.log(req.body.name);
+    db.collection("pokemons").findOne(
+      { name: req.body.name },
+      function (err, result) {
+        if (err) throw err;
 
+        db.collection("users").updateOne(
+          { username: req.session.username },
+          { $pull: { pokemons: result } }
+        );
+        let user = req.session.username;
         //console.log(dataPoke);
         let dataPoke = db
           .collection("users")
@@ -236,13 +255,12 @@ app.post("/anadirpokemon", (req, res, next) => {
             if (err) throw err;
 
             //console.log(result.pokemons); //Muestra el array devuelto
-            let dataPokes = [result.pokemons];
+            let dataPokes = result.pokemons;
 
             console.log(dataPokes);
 
-            res.render("mispokemons", { dataPokes, username });
+            res.redirect("mispokemons");
           });
-        //res.render("anadirpokemon", { dataPoke, username });
       }
     );
   }
