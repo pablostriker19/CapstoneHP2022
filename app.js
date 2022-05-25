@@ -80,6 +80,7 @@ if (!primeraVez) {
             name: pokemonBuscado.name,
             type: pokemonBuscado.types[0].type.name,
             sprite: pokemonBuscado.sprites.front_default,
+            //sprite: pokemonBuscado.sprites.other.official-artwork.front_default,
           });
           //Ordenamos la lista a cada pokemon obtenido
           listaPokemons.sort(function (a, b) {
@@ -123,23 +124,6 @@ if (!primeraVez) {
 }
 */
 
-//Se obtiene la lista de los pokemons, solo utilizaremos su nombre.
-
-/*
-          //  IMPORTANTE. EJECUTAR ESTE CÓDIGO SOLO UNA VEZ
-          //  CONEXION CON MONGO para cargar archivo el pokemon.js
-          
-          let datosLeidos = fs.readFileSync("pokemons.js");
-          let dataParsed = JSON.parse(datosLeidos);
-          MongoClient.connect(url, function (err, client) {
-            console.log("Conectado a MongoDB para cargar los Pokemons de la API");
-            var db = client.db("capstoneBD"); //nombre base de datos
-           
-            db.collection("pokemons").insertMany(dataParsed);
-          
-          });
-          */
-
 /**********************************************/
 /*       Conexión a la base de datos          */
 /**********************************************/
@@ -181,24 +165,24 @@ app.get("/inicio", (req, res, next) => {
   } else {
     let username = req.session.username;
     let pokeIniciales;
+    let fotoPerfil;
+    let nPokemons;
 
     db.collection("users").findOne(
-      { username: username },
+      { username: req.session.username },
       function (err, result) {
         if (err) throw err;
 
         if (result) {
           //Asigno los pokemons que tiene el usuario en la BD
-          pokeIniciales = result.pokemons;
+          pokeIniciales = [result.pokemons];
+          nPokemons = pokeIniciales.length;
+          fotoPerfil = pokeIniciales[0].sprite;
         }
+        res.render("inicio", {pokeIniciales, username, nPokemons, fotoPerfil});
       }
     );
-
-    let data = {
-      username: req.session.username,
-      pokeIniciales,
-    };
-    res.render("inicio", data);
+    
   }
 });
 
@@ -362,43 +346,18 @@ app.post("/registro", (req, res, next) => {
   let password = req.body.inputPassword;
   let pokeElegido;
 
-  if (req.body.bulbasaur) {
-    // Consultamos a la BBDD por el pokemon elegido.
-    db.collection("pokemons").findOne(
-      { name: "bulbasaur" },
-      function (findErr, result) {
-        if (findErr) throw findErr;
-        // db.collection("users").updateOne({item: "pokemons", result});
-        if (result) {
-          pokeElegido = result;
-        }
-      }
-    );
-  } else if (req.body.charmander) {
-    // Consultamos a la BBDD por el pokemon elegido.
-    db.collection("pokemons").findOne(
-      { name: "charmander" },
-      function (findErr, result) {
-        if (findErr) throw findErr;
+  // Consultamos a la BBDD por el pokemon elegido.
 
-        if (result) {
-          pokeElegido = result;
-        }
+  console.log(req.body.name);
+  db.collection("pokemons").findOne({ name: req.body.name },
+    function (err, result) {
+      if (err) throw err;
+      
+      if (result) {
+        pokeElegido = [result];
       }
-    );
-  } else if (req.body.squirtle) {
-    // Consultamos a la BBDD por el pokemon elegido.
-    db.collection("pokemons").findOne(
-      { name: "squirtle" },
-      function (findErr, result) {
-        if (findErr) throw findErr;
-
-        if (result) {
-          pokeElegido = result;
-        }
-      }
-    );
-  }
+    }
+  );
 
   //Buscamos si ya hay un usuario registrado con ese nombre
   db.collection("users").findOne(
