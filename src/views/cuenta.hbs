@@ -1,3 +1,22 @@
+<script language="JavaScript">
+function confirmar(){
+    if (confirm('¿Seguro que quieres cambiar tu nombre?')){
+       document.cambiarusername.submit()
+    }
+}
+function confirmarpassword(){
+    if (confirm('¿Seguro que quieres cambiar tu contraseña?')){
+       document.cambiarpassword.submit()
+    }
+}
+function confirmar_borrado(){
+    if (confirm('¿Seguro que quieres borrar tu cuenta?')){
+       document.borrarcuenta.submit()
+    }
+}
+</script>
+
+
 <div class="container mt-5">
     <div class="row no-gutters">
         <div class="col-md-12">
@@ -5,7 +24,7 @@
                     <h3 class="card-header text-center">Datos de la cuenta</h3>
                     <div class="card-body">
                         <!-- Cuerpo de la tarjeta -->
-                        <form name="cambiarusername" action="/cambiarusername" method="POST">
+                        <form name="cambiarusername" id="cambiarusername" action="/cambiarusername" method="POST">
                         <h4 class="card-title">Cambiar nombre:</h4>
                         <div class="row justify-content-start ml-5">
                             <div class="col-md-8">
@@ -15,14 +34,21 @@
                                         class="form-control"
                                         name="newusername"
                                         id="newusername"
-                                        placeholder={{username}}
+                                        
                                         required="required"/>
-                                    
-                              
+
+                                    {{#if usernameIncorrecto}}
+                                        <br>
+                                        <p aria-atomic="true" style="color: #ff0000;" >El nombre introducido no es correcto. Puede que ya haya un usuario con ese nombre...</p>
+                                    {{/if}}
+                                    {{#if usernameCambiado}}
+                                        <br>
+                                        <p aria-atomic="true" style="color: #2d9c11;" >El nombre de usuario ha sido cambiado con éxito!</p>
+                                    {{/if}}
 
                             </div>
                             <div class="col-md-2">
-                                <button class="btn btn-primary" type="submit">Guardar</button>
+                                <button class="btn btn-primary" onclick="confirmar()" type="submit">Guardar</button>
 
                             </div>
                         </div>
@@ -50,23 +76,32 @@
                                             id="newpassword"
                                             placeholder="Nueva contraseña"
                                             required="required"/>
-                                    </form>
 
+                                    {{#if passwordCambiada}}
+                                        <br>
+                                        <p aria-atomic="true" style="color: #2d9c11;" >Contraseña cambiada con éxito!</p>
+                                    {{/if}}
+                                    {{#if passwordIncorrecta}}
+                                        <br>
+                                        <p aria-atomic="true" style="color: #ff0000;" >Contraseña no cambiada. Compruebe la antigua contraseña.</p>
+                                    {{/if}}
                                 </div>
-                                <div class="col-md-2">
-                                    <button class="btn btn-primary mt-4" type="submit">Guardar</button>
 
+                                <div class="col-md-2">
+                                    <button class="btn btn-primary mt-4" type="submit" onclick="confirmarpassword()">Guardar</button>
                                 </div>
                             </div>
-                            </form>
+                        </form>
                     </div>
+                                
+                            
                     <br><br>
                     <div class="card-body">
                         <div class="row d-flex justify-content-center text-center">
 
                                 <h4 class="card-title">Borrar cuenta:</h4>
-                                <form action="/">
-                                    <button class="btn btn-danger ml-4" type="submit">Borrar cuenta</button>
+                                <form action="/borrarcuenta" method="POST">
+                                    <button class="btn btn-danger ml-4" onclick="confirmar_borrado()" type="submit">Borrar cuenta</button>
                                 </form>
                             
                         </div>

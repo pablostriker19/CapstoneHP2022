@@ -17,7 +17,7 @@ const url = "mongodb://localhost/27017";
 const randomBytes = crypto.randomBytes;
 
 const interval = {
-  limit: 15,
+  limit: 20,
   offset: 0,
 };
 const __filename = fileURLToPath(import.meta.url);
@@ -31,6 +31,8 @@ var passwordCambiada = false;
 var usernameCambiado = false;
 var usernameIncorrecto = false;
 var sessionGuardada;
+
+let db;
 
 app.set("views", __dirname + "/src/views");
 app.set("view engine", "hbs");
@@ -52,20 +54,36 @@ app.use(
 // Junto con su posterior carga en la Base de datos
 
 //          Comentar y descomentar
-
 /**********************************************/
-/*
-          let resApiPokemons;
-          P.getPokemonsList(interval).then((response) => {
-            console.log(response.results);
-            resApiPokemons = JSON.stringify(response.results);
 
+const listaPokemons = [];
+//Se obtiene la lista de los pokemons, solo utilizaremos su nombre.
+P.getPokemonsList(interval).then((respuestaAPI) => {
+  //console.log(response.results[0].name);
+  //resApiPokemons = JSON.stringify(respuestaAPI.results);
+  console.log(respuestaAPI.results.length);
+
+  //respuestaAPI.results.length
+  for (let i = 0; i < 6; i++) {
+    //Recorro la lista de los pokemons
+    P.getPokemonByName(respuestaAPI.results[i].name).then((pokemonBuscado) => {
+      console.log(
+        pokemonBuscado.name,
+        pokemonBuscado.height,
+        pokemonBuscado.weight,
+        pokemonBuscado.types[0].type.name
+      );
+
+      listaPokemons.push(pokemonBuscado);
+    });
+  }
+
+  /*
             fs.writeFile("pokemons.js", resApiPokemons, function(err, result) {
               if(err) console.log('error', err);
             });//Creo el JSON pokemons.js
-
-          });
-          */
+            */
+});
 
 /*
           //      IMPORTANTE. EJECUTAR ESTE CÓDIGO SOLO UNA VEZ
@@ -83,7 +101,14 @@ app.use(
           */
 
 /**********************************************/
+/*       Conexión a la base de datos          */
 /**********************************************/
+MongoClient.connect(url, function (err, client) {
+  if (err) throw err;
+  console.log("Conectado a MongoDB.");
+
+  db = client.db("capstoneBD"); //Nombre de la BBDD
+});
 
 //  -----------------------------------------------------------------------------------
 //  RENDERIZACION DE PAGINAS
@@ -103,27 +128,20 @@ app.get("/inicio", (req, res, next) => {
   if (!req.session.username) {
     res.redirect("/");
   } else {
+    let username = req.session.username;
     let pokeIniciales;
 
-    MongoClient.connect(url, function (err, client) {
-      console.log("Conectado a MongoDB desde inicio");
+    db.collection("users").findOne(
+      { username: username },
+      function (err, result) {
+        if (err) throw err;
 
-      var db = client.db("capstoneBD"); //Nombre de la BBDD
-      db.collection("users").findOne(
-        { username: req.session.username },
-        function (err, result) {
-          console.log("");
-          if (err) throw err;
-          if (result) {
-            console.log(result); //Muestra el array devuelto
-            pokeIniciales = result.pokemons.toArray();
-          } else {
-            console.log("No encuentro nada");
-          }
+        if (result) {
+          //Asigno los pokemons que tiene el usuario en la BD
+          pokeIniciales = result.pokemons;
         }
-      );
-      client.close();
-    });
+      }
+    );
 
     let data = {
       username: req.session.username,
@@ -138,110 +156,58 @@ app.get("/mispokemons", (req, res, next) => {
   if (!req.session.username) {
     res.redirect("/");
   } else {
-    MongoClient.connect(url, function (err, client) {
-      console.log("Conectado a MongoDB desde mispokemons");
+    let username = req.session.username;
+    /*
+    let pokeUsuario = db.collection("users").findOne({ username: req.session.username });
+    console.log(pokeUsuario);
+    */
+    db.collection("users").findOne(
+      { username: req.session.username },
+      function (err, result) {
+        if (err) throw err;
 
-      var db = client.db("capstoneBD"); //Nombre de la BBDD
-      db.collection("users")
-        .find({ pokemons })
-        .toArray(function (err, pokeUsuario) {
-          if (err) throw err;
-          console.log(pokeUsuario); //Muestra el array devuelto
-          db.close();
-        });
-      client.close();
-    });
+        //console.log(result.pokemons); //Muestra el array devuelto
+        let dataPoke = [result.pokemons];
 
-    let data = {
-      username: req.session.username,
-      pokeUsuario,
-    };
-    res.render("mispokemons", data);
+        console.log(dataPoke);
+
+        res.render("mispokemons", { dataPoke, username });
+      }
+    );
   }
 });
 
 //  Pagina añadir pokemons
 app.get("/maspokemons", (req, res, next) => {
-  //POKEMONS DE PRUEBA
-  /*
-  const pokemons = [
-    {
-      name: "Bulbasaur",
-      photo: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/001.png",
-      tipo: "Planta",
-    },
-    {
-      name: "Ivysaur",
-      photo: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/002.png",
-      tipo: "Planta",
-    },
-    {
-      name: "Venusaur",
-      photo: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/003.png",
-      tipo: "Planta",
-    },
-    {
-      name: "Charmander",
-      photo: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/004.png",
-      tipo: "Fuego",
-    },
-    {
-      name: "Charmeleon",
-      photo: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/005.png",
-      tipo: "Fuego",
-    },
-    {
-      name: "Charizard",
-      photo: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/006.png",
-      tipo: "Fuego",
-    },
-    {
-      name: "Squirtle",
-      photo: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/007.png",
-      tipo: "Agua",
-    },
-    {
-      name: "Wartortle",
-      photo: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/008.png",
-      tipo: "Agua",
-    },
-    {
-      name: "Blastoise",
-      photo: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/009.png",
-      tipo: "Agua",
-    },
-    {
-      name: "Pikachu",
-      photo: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/025.png",
-      tipo: "Electrico",
-    },
-  ];*/
   if (!req.session.username) {
     res.redirect("/");
   } else {
-    MongoClient.connect(url, function (err, client) {
-      console.log("Conectado a MongoDB desde maspokemons");
-
-      var db = client.db("capstoneBD"); //Nombre de la BBDD
-      db.collection("pokemons")
-        .find({})
-        .toArray(function (err, pokeLeidos) {
-          if (err) throw err;
-          console.log(pokeLeidos); //Muestra el array devuelto
-          db.close();
-        });
-      client.close();
-    });
-
-    let data = {
-      username: req.session.username,
-      pokeLeidos,
-    };
-    res.render("maspokemons", data);
+    let username = req.session.username;
+    /*db.collection("pokemons").find({}, function (err, result) {
+      if (err) throw err;
+        
+      //console.log(result.pokemons); //Muestra el array devuelto
+      console.log("Obtengo los pokemons en masPokemons");
+      console.log(result.pokemons);
+      let dataPoke = [
+        result.pokemons
+      ];
+      
+      console.log(dataPoke);
+        
+      res.render("maspokemons", {dataPoke, username});
+      
+    });*/
+    //let poke = db.collection("pokemons").find().toArray();
+    let poke = db.collection("pokemons").findOne({ name: "bulbasaur" });
+    console.log("Obtengo los pokemons en masPokemons");
+    console.log(poke);
+    let dataPoke = [poke];
+    res.render("maspokemons", { dataPoke, username });
   }
 });
 
-//  Ver pokemon
+//  Ver cada pokemon
 app.get("/verpokemon", (req, res, next) => {
   if (!req.session.username) {
     res.redirect("/");
@@ -289,34 +255,27 @@ app.post("/login", (req, res, next) => {
   let password = req.body.inputPassword;
 
   // Consultamos a la BBDD por el usuario
-  MongoClient.connect(url, function (err, client) {
-    // Client returned
-    var db = client.db("capstoneBD");
-    console.log("Conectado a la base de datos desde el post del login.");
+  db.collection("users").findOne(
+    { username: username },
+    function (findErr, result) {
+      if (findErr) throw findErr;
 
-    db.collection("users").findOne(
-      { username: username },
-      function (findErr, result) {
-        if (findErr) throw findErr;
-
-        client.close();
-        if (result) {
-          if (password == result.password) {
-            req.session.username = req.body.inputUsername;
-            req.session.save(function (err) {
-              res.redirect("/inicio");
-            });
-          } else {
-            inicioSesionIncorrecto = true;
-            res.render("index", { inicioSesionIncorrecto, layout: false });
-          }
+      if (result) {
+        if (password == result.password) {
+          req.session.username = req.body.inputUsername;
+          req.session.save(function (err) {
+            res.redirect("/inicio");
+          });
         } else {
           inicioSesionIncorrecto = true;
           res.render("index", { inicioSesionIncorrecto, layout: false });
         }
+      } else {
+        inicioSesionIncorrecto = true;
+        res.render("index", { inicioSesionIncorrecto, layout: false });
       }
-    );
-  });
+    }
+  );
 });
 
 //  Codigo para registrarse
@@ -325,98 +284,73 @@ app.post("/registro", (req, res, next) => {
   let username = req.body.inputUsername;
   let password = req.body.inputPassword;
   let pokeElegido;
-  console.log(req.body.poke1);
 
-  if (req.body.poke1) {
-    console.log("A");
+  if (req.body.bulbasaur) {
     // Consultamos a la BBDD por el pokemon elegido.
-    MongoClient.connect(url, function (err, client) {
-      var db = client.db("capstoneBD"); //Nombre BBDD
-
-      db.collection("pokemons").findOne(
-        { name: "bulbasur" },
-        function (findErr, result) {
-          if (findErr) throw findErr;
-          // db.collection("users").updateOne({item: "pokemons", result});
-          if (result) {
-            pokeElegido = result;
-          }
-        }
-      );
-      client.close();
-    });
-  } else if (req.body.poke4) {
-    // Consultamos a la BBDD por el pokemon elegido.
-    MongoClient.connect(url, function (err, client) {
-      var db = client.db("capstoneBD"); //Nombre BBDD
-
-      db.collection("pokemons").findOne(
-        { name: "charmander" },
-        function (findErr, result) {
-          if (findErr) throw findErr;
-
-          if (result) {
-            pokeElegido = result;
-          }
-        }
-      );
-      client.close();
-    });
-  } else {
-    // Consultamos a la BBDD por el pokemon elegido.
-    MongoClient.connect(url, function (err, client) {
-      var db = client.db("capstoneBD");
-
-      db.collection("pokemons").findOne(
-        { name: "squirtle" },
-        function (findErr, result) {
-          if (findErr) throw findErr;
-
-          if (result) {
-            pokeElegido = result;
-          }
-        }
-      );
-      client.close();
-    });
-  }
-
-  // Consultamos a la BBDD por el usuario
-  MongoClient.connect(url, function (err, client) {
-    var db = client.db("capstoneBD"); //Nombre BBDD
-
-    //Buscamos si ya hay un usuario registrado con ese nombre
-    db.collection("users").findOne(
-      { username: username },
+    db.collection("pokemons").findOne(
+      { name: "bulbasaur" },
       function (findErr, result) {
         if (findErr) throw findErr;
-        client.close();
-
-        if (!result) {
-          //Si no hay ningun usuario con ese nombre en la BBDD:
-          MongoClient.connect(url, function (err, client) {
-            var db = client.db("capstoneBD");
-
-            db.collection("users").insertOne(
-              { username: username, password: password, pokemons: pokeElegido },
-              function (findErr, result) {
-                if (findErr) throw findErr;
-                //Redirigimos al inicio con la sesion iniciada
-                client.close();
-                req.session.username = req.body.inputUsername;
-                req.session.save(function (err) {
-                  res.redirect("/inicio");
-                });
-              }
-            );
-          });
-        } else {
-          registroIncorrecto = true;
-          res.render("registro", { registroIncorrecto, layout: false });
+        // db.collection("users").updateOne({item: "pokemons", result});
+        if (result) {
+          pokeElegido = result;
         }
       }
     );
-  });
+  } else if (req.body.charmander) {
+    // Consultamos a la BBDD por el pokemon elegido.
+    db.collection("pokemons").findOne(
+      { name: "charmander" },
+      function (findErr, result) {
+        if (findErr) throw findErr;
+
+        if (result) {
+          pokeElegido = result;
+        }
+      }
+    );
+  } else if (req.body.squirtle) {
+    // Consultamos a la BBDD por el pokemon elegido.
+    db.collection("pokemons").findOne(
+      { name: "squirtle" },
+      function (findErr, result) {
+        if (findErr) throw findErr;
+
+        if (result) {
+          pokeElegido = result;
+        }
+      }
+    );
+  }
+
+  // Consultamos a la BBDD por el usuario
+
+  //Buscamos si ya hay un usuario registrado con ese nombre
+  db.collection("users").findOne(
+    { username: username },
+    function (findErr, result) {
+      if (findErr) throw findErr;
+
+      if (!result) {
+        //Si no hay ningun usuario con ese nombre en la BBDD:
+        db.collection("users").insertOne(
+          { username: username, password: password, pokemons: pokeElegido },
+          function (findErr, result) {
+            if (findErr) throw findErr;
+            //Redirigimos al inicio con la sesion iniciada
+
+            req.session.username = req.body.inputUsername;
+            req.session.save(function (err) {
+              res.redirect("/inicio");
+            });
+          }
+        );
+      } else {
+        registroIncorrecto = true;
+        res.render("registro", { registroIncorrecto, layout: false });
+      }
+    }
+  );
 });
 
 //  Codigo para cerrar sesion
@@ -430,44 +364,42 @@ app.post("/cambiarusername", (req, res, next) => {
   let newusername = req.body.newusername;
   console.log(newusername, req.session.username);
 
-  MongoClient.connect(url, function (err, client) {
-    var db = client.db("capstoneBD");
-    //Buscamos si ya hay un usuario registrado con ese nombre
-    db.collection("users").findOne(
-      { username: newusername },
-      function (findErr, result) {
-        if (findErr) throw findErr;
-        client.close();
-        //Si no hay ningun usuario con ese nombre en la BBDD:
-        if (!result) {
-          MongoClient.connect(url, function (err, client) {
-            var db = client.db("capstoneBD");
+  //Buscamos si ya hay un usuario registrado con ese nombre
+  db.collection("users").findOne(
+    { username: newusername },
+    function (findErr, result) {
+      if (findErr) throw findErr;
 
-            db.collection("users").updateOne(
-              { username: req.session.username },
-              { $set: { username: newusername } },
-              function (findErr, result) {
-                if (findErr) throw findErr;
-                //Redirigimos cambiando el username en la sesion
-                client.close();
-                req.session.username = newusername;
+      //Si no hay ningun usuario con ese nombre en la BBDD:
+      if (!result) {
+        MongoClient.connect(url, function (err, client) {
+          var db = client.db("capstoneBD");
 
-                req.session.save(function (err) {
-                  let data = {
-                    username: req.session.username,
-                  };
-                  res.render("cuenta", data);
-                });
-              }
-            );
-          });
-        } else {
-          usernameIncorrecto = true;
-          res.render("cuenta", { usernameIncorrecto });
-        }
+          db.collection("users").updateOne(
+            { username: req.session.username },
+            { $set: { username: newusername } },
+            function (findErr, result) {
+              if (findErr) throw findErr;
+
+              //Redirigimos cambiando el username en la sesion
+              req.session.username = newusername;
+
+              req.session.save(function (err) {
+                let data = {
+                  usernameCambiado: true,
+                  username: req.session.username,
+                };
+                res.render("cuenta", data);
+              });
+            }
+          );
+        });
+      } else {
+        usernameIncorrecto = true;
+        res.render("cuenta", { usernameIncorrecto });
       }
-    );
-  });
+    }
+  );
 });
 
 //  Codigo para cambiar contraseña
@@ -475,46 +407,47 @@ app.post("/cambiarpassword", (req, res, next) => {
   let newpassword = req.body.newpassword;
   let oldpassword = req.body.oldpassword;
 
-  MongoClient.connect(url, function (err, client) {
-    var db = client.db("capstoneBD"); //Nombre BBDD
+  db.collection("users").findOne(
+    { username: req.session.username },
+    function (findErr, result) {
+      if (findErr) throw findErr;
 
-    db.collection("users").findOne(
-      { username: req.session.username },
-      function (findErr, result) {
-        if (findErr) throw findErr;
-
-        client.close();
-        if (result) {
-          if (result.password == oldpassword) {
-            MongoClient.connect(url, function (err, client) {
-              var db = client.db("users");
-              db.collection("users").updateOne(
-                { username: req.session.username },
-                { $set: { password: newpassword } },
-                function (findErr, result) {
-                  if (findErr) throw findErr;
-                  client.close();
-                }
-              );
-            });
-            req.session.save(function (err) {
-              let data = {
-                username: req.session.username,
-                passwordCambiada: true,
-              };
-              res.render("cuenta", data);
-            });
-          } else {
-            passwordIncorrecta = true;
-            res.render("cuenta", { passwordIncorrecta });
-          }
+      if (result) {
+        if (result.password == oldpassword) {
+          db.collection("users").updateOne(
+            { username: req.session.username },
+            { $set: { password: newpassword } }
+          );
+          req.session.save(function (err) {
+            let data = {
+              username: req.session.username,
+              passwordCambiada: true,
+            };
+            res.render("cuenta", data);
+          });
         } else {
           passwordIncorrecta = true;
           res.render("cuenta", { passwordIncorrecta });
         }
+      } else {
+        passwordIncorrecta = true;
+        res.render("cuenta", { passwordIncorrecta });
       }
-    );
-  });
+    }
+  );
+});
+
+//  Codigo para borrar cuenta
+app.post("/borrarcuenta", (req, res, next) => {
+  db.collection("users").deleteOne(
+    { username: req.session.username },
+    function (findErr, result) {
+      if (findErr) throw findErr;
+
+      delete req.session;
+      res.redirect("/");
+    }
+  );
 });
 
 app.use(cookieParser());
