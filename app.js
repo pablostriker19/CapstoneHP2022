@@ -17,7 +17,7 @@ const url = "mongodb://localhost/27017";
 const randomBytes = crypto.randomBytes;
 
 const interval = {
-  limit: 15,
+  limit: 20,
   offset: 0,
 };
 const __filename = fileURLToPath(import.meta.url);
@@ -55,18 +55,32 @@ app.use(
 
 //          Comentar y descomentar
 /**********************************************/
-/*
-          let resApiPokemons;
-          P.getPokemonsList(interval).then((response) => {
-            console.log(response.results);
-            resApiPokemons = JSON.stringify(response.results);
 
+          const listaPokemons = [];
+          //Se obtiene la lista de los pokemons, solo utilizaremos su nombre.
+          P.getPokemonsList(interval).then((respuestaAPI) => {
+            //console.log(response.results[0].name);
+            //resApiPokemons = JSON.stringify(respuestaAPI.results);
+            console.log(respuestaAPI.results.length);
+            
+            //respuestaAPI.results.length
+            for(let i = 0; i < 6; i++ ){ //Recorro la lista de los pokemons
+              P.getPokemonByName(respuestaAPI.results[i].name).then((pokemonBuscado) => {
+                console.log(pokemonBuscado.name, pokemonBuscado.height, pokemonBuscado.weight, pokemonBuscado.types[0].type.name);
+
+                listaPokemons.push(pokemonBuscado);
+              });
+              
+            }
+          
+            
+            /*
             fs.writeFile("pokemons.js", resApiPokemons, function(err, result) {
               if(err) console.log('error', err);
             });//Creo el JSON pokemons.js
-
+            */
           });
-          */
+          
 
 /*
           //      IMPORTANTE. EJECUTAR ESTE CÓDIGO SOLO UNA VEZ
@@ -164,12 +178,13 @@ app.get("/maspokemons", (req, res, next) => {
   if (!req.session.username) {
     res.redirect("/");
   } else {
-
     let username = req.session.username;
-    db.collection("users").findOne({ username: req.session.username }, function (err, result) {
+    /*db.collection("pokemons").find({}, function (err, result) {
       if (err) throw err;
         
       //console.log(result.pokemons); //Muestra el array devuelto
+      console.log("Obtengo los pokemons en masPokemons");
+      console.log(result.pokemons);
       let dataPoke = [
         result.pokemons
       ];
@@ -178,21 +193,17 @@ app.get("/maspokemons", (req, res, next) => {
         
       res.render("maspokemons", {dataPoke, username});
       
-    });
+    });*/
+    //let poke = db.collection("pokemons").find().toArray();
+    let poke = db.collection("pokemons").finOne({name: "bulbasaur"});
+    console.log("Obtengo los pokemons en masPokemons");
+    console.log(poke.name);
+    let dataPoke = [
+      poke
+    ];
+    res.render("maspokemons", {dataPoke, username});
 
-    let pokeLeidos;
-    db.collection("pokemons").find({}, function (err, result) {
-        if (err) throw err;
-        console.log("Pokemons en masPokemons");
-        console.log(result); //Muestra el array devuelto
-        pokeLeidos=result;
-      });
-
-    let data = {
-      username: req.session.username,
-      pokeLeidos,
-    };
-    res.render("maspokemons", data);
+  
   }
 });
 
