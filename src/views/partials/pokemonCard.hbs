@@ -1,20 +1,22 @@
-
-<div class="col-md-4 mt-4">
-  <div class="card w-70" >
-    <img class="card-img-top" style="border: 2px solid #161616;" src="{{this.sprites.other.official-artwork}}" alt="{{this.name}}" />
+<div class="col-md-3 mt-3">
+  <div class="card">
+    <img class="card-img-top" style="border: 1px solid #161616;" src="{{sprite}}" alt="{{name}}"/>
     
     <div class="card-body text-center">
-      
       <h4 class="card-title"> {{name}} </h4>
-      <p class="card-text"> {{url}}</p>
       
-      <div class="justify-content-around">
+    	<div class="container-fluid"> 
+    		<div class="align-items-center">
+          <h5>{{type}}</h5>
+    			<br>
 
-        <a href="/verpokemon" class="btn btn-success"> Ver </a>
-
-        <a  href="#" class="btn btn-danger"> Eliminar </a>
-
-      </div>
+          <div class="col text-center">
+            <form name="cambiarusername" id="cambiarusername" action="/borrarpokemon" method="POST">
+    				  <button class="btn btn-success regular-button" name="name" value="{{name}}" type="submit">Eliminar</button>
+    			  </form>
+          </div>	
+    		</div> 
+    	</div>    
     </div>
   </div>
 </div>
