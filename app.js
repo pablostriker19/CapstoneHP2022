@@ -263,7 +263,7 @@ app.post("/borrarpokemon", (req, res, next) => {
   }
 });
 
-//  Pagina vert todos los pokemons
+//  Pagina ver todos los pokemons
 app.get("/maspokemons", (req, res, next) => {
   if (!req.session.username) {
     res.redirect("/");
@@ -284,11 +284,26 @@ app.get("/maspokemons", (req, res, next) => {
 });
 
 //  Ver cada pokemon
-app.get("/verpokemon", (req, res, next) => {
+app.get("/mispokemons/:pokeName", (req, res, next) => {
+
+  let username = req.session.username;
+  let pokeElegido;
+  console.log(req.params.pokeName);
+
   if (!req.session.username) {
     res.redirect("/");
   } else {
-    res.render("verpokemon", req.session);
+
+    //console.log(req.body);
+    db.collection("pokemons").findOne({ name: req.params.pokeName },
+      function (err, result) {
+        if (err) throw err;
+        
+        pokeElegido = result;
+        res.render("verpokemon", {username, pokeElegido});
+      }
+    );
+
   }
 });
 

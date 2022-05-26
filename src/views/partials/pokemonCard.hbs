@@ -9,18 +9,15 @@
       <p class="card-text text-center">Tipo: <i>{{type}}</i></p>
       
     	
-    	<div class="d-flex justify-content-center ">
-        <br>
-    		<div class="col-sm-5">
-          <form action="/verpokemon" method="POST">
-    			  <button class="btn btn-primary regular-button" name="name" value="{{name}}" type="submit">Ver</button>
+    	<div class="d-flex justify-content-around mt-3">
+    		<div class="row text-center flex-direction">
+          <form action="/mispokemons/{{name}}" method="GET">
+    			  <button class="btn btn-primary regular-button mr-2" type="submit">Ver</button>
     			</form>
-        </div>
-          
-        <div class="col-sm-5">
           <form action="/borrarpokemon" method="POST">
-            <button class="btn btn-danger regular-button" name="name" value="{{name}}" type="submit">Eliminar</button>
+            <button class="btn btn-danger regular-button ml-2" name="name" value="{{name}}" type="submit">Eliminar</button>
           </form>
+
         </div>
         
     	</div> 
