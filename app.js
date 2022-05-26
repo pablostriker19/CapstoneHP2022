@@ -4,7 +4,6 @@ import path, { parse } from "path";
 import { fileURLToPath } from "url";
 import bodyParser from "body-parser";
 import { MongoClient } from "mongodb";
-import crypto from "crypto";
 import cookieParser from "cookie-parser";
 import session from "express-session";
 import Pokedex from "pokedex-promise-v2";
@@ -12,13 +11,13 @@ import fs from "fs";
 import { devNull } from "os";
 import { ADDRGETNETWORKPARAMS } from "dns";
 
+
 const app = express();
 const router = express.Router();
 const url = "mongodb://localhost/27017";
-const randomBytes = crypto.randomBytes;
 
 const interval = {
-  limit: 20,
+  limit: 49,
   offset: 0,
 };
 const __filename = fileURLToPath(import.meta.url);
@@ -32,6 +31,7 @@ var passwordIncorrecta = false;
 var usernameIncorrecto = false;
 
 
+let resApiPokemons;
 let db;
 
 app.set("views", __dirname + "/src/views");
@@ -49,33 +49,38 @@ app.use(
   })
 );
 
+
 /**********************************************/
-// Obtención del los 20 primeros pokemons de la API
-// Junto con su posterior carga en la Base de datos
+/*       Conexión a la base de datos          */
+/**********************************************/
+MongoClient.connect(url, function (err, client) {
+  if (err) throw err;
+  
+  db = client.db("capstoneBD"); //Nombre de la BBDD
+});
 
-/*
-let a = 0;
-if (!primeraVez) {
-  primeraVez = true;
+/****************************************************/
+// Obtención del los 49 primeros pokemons de la API
+/****************************************************/
+
+if(!fs.existsSync("pokemons.json")){ //El archivo no existe. 
+  // Hay que realizar la connexión a la API para extraer los pokemons en 'pokemons.json'
+  
   P.getPokemonsList(interval).then((respuestaAPI) => {
-    //console.log(response.results[0].name);
-    //resApiPokemons = JSON.stringify(respuestaAPI.results);
-    //console.log(respuestaAPI.results);
-
+    
     for (let i = 0; i < respuestaAPI.results.length; i++) {
+      
       //Recorro la lista de los pokemons
-
       P.getPokemonByName(respuestaAPI.results[i].name).then(
         (pokemonBuscado) => {
-          //console.log(pokemonBuscado.name, pokemonBuscado.id, pokemonBuscado.types[0].type.name);
-
+          
           listaPokemons.push({
             id: pokemonBuscado.id,
             name: pokemonBuscado.name,
             type: pokemonBuscado.types[0].type.name,
             sprite: pokemonBuscado.sprites.front_default,
-            //sprite: pokemonBuscado.sprites.other.official-artwork.front_default,
           });
+
           //Ordenamos la lista a cada pokemon obtenido
           listaPokemons.sort(function (a, b) {
             if (a.id > b.id) {
@@ -84,66 +89,52 @@ if (!primeraVez) {
             if (a.id < b.id) {
               return -1;
             }
-            // a must be equal to b
             return 0;
           });
 
           resApiPokemons = JSON.stringify(listaPokemons);
-
-          //console.log(resApiPokemons);
-
-          //fs.createWriteStream("pokemons.json")
-          if (a == 19) {
-            console.log("He entrado en el if chapuza");
-            fs.writeFile(
+          
+          if (listaPokemons.length == 49) {
+            
+            fs.writeFileSync(
               "pokemons.json",
               resApiPokemons,
               function (err, result) {
-                if (err) console.log("error", err);
+                if (err) throw err;
               }
             );
           }
-          a++;
+          
         }
       );
-      console.log(i);
     } // fin del for
 
-    /*
-  fs.writeFile("pokemons.json", parseo, function(err, result) {
-    if(err) console.log('error', err);
-  });//Creo el JSON pokemons.js
-  
   });
+  
 }
-*/
 
-/**********************************************/
-/*       Conexión a la base de datos          */
-/**********************************************/
-MongoClient.connect(url, function (err, client) {
-  if (err) throw err;
-  console.log("Conectado a MongoDB.");
-
-  db = client.db("capstoneBD"); //Nombre de la BBDD
-});
-
-//  CARGAR POKEMONS EN MONGO, SOLO 1 VEZ
-/*
-MongoClient.connect(url, function (err, client) {
-  console.log("Conectado a MongoDB para cargar los Pokemons de la API");
-  var db = client.db("capstoneBD"); //nombre base de datos
-
-  let datosLeidos = fs.readFileSync("pokemons.json");
-  let dataParsed = JSON.parse(datosLeidos);
-  db.collection("pokemons").insertMany(dataParsed);
-});
-*/
-//  -----------------------------------------------------------------------------------
-//  RENDERIZACION DE PAGINAS
-
+/****************************************************/
+//          Renderización de Páginas
+/****************************************************/
 
 app.get("/", (req, res, next) => {
+
+  // Consulta a la base de datos para cargar los pokemons 
+  //  obtenidos de la API en caso de que no haya ya ningún pokemon.
+  db.collection("pokemons").findOne(
+    { name: "bulbasaur" },
+    function (findErr, result) {
+      if (findErr) throw findErr;
+
+      //Si no encuentra ningún pokemon en la base de datos,
+      //  no hace falta que se cargen los datos
+      if (!result) {  
+        let datosLeidos = fs.readFileSync("pokemons.json");
+        let dataParsed = JSON.parse(datosLeidos);
+        db.collection("pokemons").insertMany(dataParsed);
+      }
+    }
+  );
   res.render("index", { layout: false });
 });
 
@@ -156,7 +147,9 @@ app.get("/registro", (req, res, next) => {
 app.get("/inicio", (req, res, next) => {
   if (!req.session.username) {
     res.redirect("/");
-  } else {
+  }
+  if(req.session.username){
+  
     let username = req.session.username;
     let pokeIniciales;
     let fotoPerfil;
@@ -175,7 +168,6 @@ app.get("/inicio", (req, res, next) => {
         res.render("inicio", {pokeIniciales, username, nPokemons, fotoPerfil});
       }
     );
-    
   }
 });
 
@@ -183,7 +175,8 @@ app.get("/inicio", (req, res, next) => {
 app.get("/mispokemons", (req, res, next) => {
   if (!req.session.username) {
     res.redirect("/");
-  } else {
+  } 
+  if(req.session.username){
     let username = req.session.username;
     
     db.collection("users").findOne(
@@ -197,13 +190,16 @@ app.get("/mispokemons", (req, res, next) => {
       }
     );
   }
+  
+  
 });
 
 //  Añadir pokemons a cada usuario
 app.post("/anadirpokemon", (req, res, next) => {
   if (!req.session.username) {
     res.redirect("/");
-  } else {
+  } 
+  if(req.session.username) {
     db.collection("pokemons").findOne(
       { name: req.body.name },
       function (err, result) {
@@ -222,7 +218,8 @@ app.post("/anadirpokemon", (req, res, next) => {
 app.post("/borrarpokemon", (req, res, next) => {
   if (!req.session.username) {
     res.redirect("/");
-  } else {
+  } 
+  if(req.session.username) {
     db.collection("pokemons").findOne(
       { name: req.body.name },
       function (err, result) {
@@ -251,7 +248,8 @@ app.post("/borrarpokemon", (req, res, next) => {
 app.get("/maspokemons", (req, res, next) => {
   if (!req.session.username) {
     res.redirect("/");
-  } else {
+  } 
+  if(req.session.username) {
     let username = req.session.username;
     let dataPokes;
     db.collection("pokemons")
@@ -264,7 +262,7 @@ app.get("/maspokemons", (req, res, next) => {
           res.render("maspokemons", { dataPokes, username });
         }
       });
-  }
+    }
 });
 
 //  Ver el pokemon seleccionado
@@ -275,7 +273,8 @@ app.get("/mispokemons/:pokeName", (req, res, next) => {
 
   if (!req.session.username) {
     res.redirect("/");
-  } else {
+  } 
+  if(req.session.username) {
 
     db.collection("pokemons").findOne({ name: req.params.pokeName },
       function (err, result) {
@@ -293,7 +292,8 @@ app.get("/mispokemons/:pokeName", (req, res, next) => {
 app.get("/cuenta", (req, res, next) => {
   if (!req.session.username) {
     res.redirect("/");
-  } else {
+  } 
+  if(req.session.username) {
     res.render("cuenta", req.session);
   }
 });
@@ -302,7 +302,8 @@ app.get("/cuenta", (req, res, next) => {
 app.get("/contacto", (req, res, next) => {
   if (!req.session.username) {
     res.redirect("/");
-  } else {
+  } 
+  if(req.session.username) {
     res.render("contacto", req.session);
   }
 });
@@ -311,7 +312,8 @@ app.get("/contacto", (req, res, next) => {
 app.get("/*", (req, res, next) => {
   if (!req.session.username) {
     res.redirect("/");
-  } else {
+  } 
+  if(req.session.username) {
     let dataNotFound = {
       notFoundImage: "https://images6.alphacoders.com/109/1094097.png",
       username: req.session.username,
@@ -319,7 +321,6 @@ app.get("/*", (req, res, next) => {
     res.render("404", dataNotFound);
   }
 });
-//  -----------------------------------------------------------------------------------
 
 //  Login
 app.post("/login", (req, res, next) => {
@@ -334,16 +335,19 @@ app.post("/login", (req, res, next) => {
       if (findErr) throw findErr;
 
       if (result) {
-        if (password == result.password) {
-          req.session.username = req.body.inputUsername;
+
+        password == result.password ? (
+          req.session.username = req.body.inputUsername,
           req.session.save(function (err) {
-            res.redirect("/inicio");
-          });
-        } else {
-          inicioSesionIncorrecto = true;
-          res.render("index", { inicioSesionIncorrecto, layout: false });
-        }
-      } else {
+            res.redirect("/inicio")
+          })
+        ) : (
+          inicioSesionIncorrecto = true,
+          res.render("index", { inicioSesionIncorrecto, layout: false })
+        );
+      } 
+
+      if(!result) {
         inicioSesionIncorrecto = true;
         res.render("index", { inicioSesionIncorrecto, layout: false });
       }
@@ -390,7 +394,8 @@ app.post("/registro", (req, res, next) => {
           }
         );
         //Si ya existe el usuario en la BBDD, no permitimos el registro.
-      } else {
+      } 
+      if(result) {
         registroIncorrecto = true;
         res.render("registro", { registroIncorrecto, layout: false });
       }
@@ -438,7 +443,7 @@ app.post("/cambiarusername", (req, res, next) => {
           );
         });
         //Si el nombre escogido ya existe en la BBDD, no permitimos el cambio
-      } else {
+      } else{
         usernameIncorrecto = true;
         res.render("cuenta", { usernameIncorrecto });
       }
@@ -457,22 +462,24 @@ app.post("/cambiarpassword", (req, res, next) => {
       if (findErr) throw findErr;
 
       if (result) {
-        if (result.password == oldpassword) {
+
+        result.password == oldpassword ? (
           db.collection("users").updateOne(
             { username: req.session.username },
             { $set: { password: newpassword } }
-          );
+          ),
           req.session.save(function (err) {
             let data = {
               username: req.session.username,
               passwordCambiada: true,
             };
             res.render("cuenta", data);
-          });
-        } else {
-          passwordIncorrecta = true;
-          res.render("cuenta", { passwordIncorrecta });
-        }
+          })
+        ) : (
+          passwordIncorrecta = true,
+          res.render("cuenta", { passwordIncorrecta })
+        );
+
       } else {
         passwordIncorrecta = true;
         res.render("cuenta", { passwordIncorrecta });

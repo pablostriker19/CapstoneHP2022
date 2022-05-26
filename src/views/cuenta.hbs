@@ -1,22 +1,3 @@
-<script language="JavaScript">
-function confirmar(){
-    if (confirm('¿Seguro que quieres cambiar tu nombre?')){
-       document.cambiarusername.submit()
-    }
-}
-function confirmarpassword(){
-    if (confirm('¿Seguro que quieres cambiar tu contraseña?')){
-       document.cambiarpassword.submit()
-    }
-}
-function confirmar_borrado(){
-    if (confirm('¿Seguro que quieres borrar tu cuenta?')){
-       document.borrarcuenta.submit()
-    }
-}
-</script>
-
-
 <div class="container mt-5">
     <div class="row no-gutters">
         <div class="col-md-12">
@@ -35,7 +16,7 @@ function confirmar_borrado(){
                                         name="newusername"
                                         id="newusername"
                                         
-                                        required="required"/>
+                                        required />
 
                                     {{#if usernameIncorrecto}}
                                         <br>
@@ -48,7 +29,7 @@ function confirmar_borrado(){
 
                             </div>
                             <div class="col-md-2">
-                                <button class="btn btn-primary" onclick="confirmar()" type="submit">Guardar</button>
+                                <button class="btn btn-primary" type="submit">Guardar</button>
 
                             </div>
                         </div>
@@ -67,7 +48,7 @@ function confirmar_borrado(){
                                             name="oldpassword"
                                             id="oldpassword"
                                             placeholder="Contraseña anterior"
-                                            required="required"/>
+                                            required />
                                             <br>
                                         <input
                                             type="password"
@@ -75,7 +56,7 @@ function confirmar_borrado(){
                                             name="newpassword"
                                             id="newpassword"
                                             placeholder="Nueva contraseña"
-                                            required="required"/>
+                                            required />
 
                                     {{#if passwordCambiada}}
                                         <br>
@@ -88,7 +69,7 @@ function confirmar_borrado(){
                                 </div>
 
                                 <div class="col-md-2">
-                                    <button class="btn btn-primary mt-4" type="submit" onclick="confirmarpassword()">Guardar</button>
+                                    <button class="btn btn-primary mt-4" type="submit">Guardar</button>
                                 </div>
                             </div>
                         </form>
@@ -106,7 +87,6 @@ function confirmar_borrado(){
                             
                         </div>
                         
-
                     </div>
                     <br><br>
                     <!-- Fin del cuerpo -->
