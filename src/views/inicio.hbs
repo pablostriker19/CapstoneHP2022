@@ -1,35 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Capstone HP 2022</title>
+    <link rel="stylesheet" href="/stylesheets/styles.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+
+</head>
+<body>
 <div class="container mt-5">
-    <div class="row d-flex justify-content-center bg-light">
-        
-            
-                <div class="col-md-4 bg-light m-4">
+    <div class="row justify-content-center">
+        <div class="col-md-12 bg-light rounded">
+            <div class="row no-gutters">
+                <div class="col-md-4 bg-light m-2">
                     <div class="row justify-content-center">
-                        <img class="rounded-circle img-fluid bg-secondary" src="{{fotoPerfil}}" width="140" height="140">
+                        <img class="rounded-circle img-fluid bg-secondary" src="https://assets.pokemon.com/assets/cms2/img/pokedex/full/004.png" width="95" height="95">
                     </div>
                     <div class="row justify-content-center mt-2">
                         <h2>{{username}}</h2>
                     </div>
                 </div>
-                <div class="col-md-6 justify-content-center">
-                    <div class="row d-flex">
-                        <div class="col-md-12 ml-5">
-                            <h1>Pokemons encontrados: {{nPokemons}}</h1>
+                <div class="col-md-6">
+                    <div class="justify-content-center">
+                        <div class="row no-gutters">
+                            <div class="col-md-12 ml-5">
+                                <h1>Pokemons encontrados:</h1>
+                            </div>
+                        </div>
+                        <div class="row no-gutters">
+                            <div class="col-md-12 ml-5">
+                                {{#each pokeIniciales}} 
+                                    {{> fotospokemonsCard this}} 
+                                {{/each}}
+                            </div>
+                        </div>
+                        <div class="row no-gutters text-center">
+                            <div class="col-md-12 ml-5 mb-2 mt-2">
+                                <a href="mispokemons"><button type="button" class="btn btn-success">Ver todos</button></a>
+                            </div>
                         </div>
                     </div>
-                    <div class="row d-flex ">
-                        <div class="col-md-12 ml-5">
-                            {{#each pokeIniciales}} 
-                                {{> fotospokemonsCard this}} 
-                            {{/each}}
-                        </div>
-                    </div>
-                    <div class="row d-flex justify-content-center mb-3">
-                        
-                        <a href="mispokemons"><button type="button" class="btn btn-success">Ver todos</button> </a>
-                        
-                    </div>  
                 </div>      
-            
-        
+            </div>
+        </div>
     </div>
 </div>
+</body>

@@ -214,7 +214,6 @@ app.post("/anadirpokemon", (req, res, next) => {
   if (!req.session.username) {
     res.redirect("/");
   } else {
-    console.log(req.body.name);
     db.collection("pokemons").findOne(
       { name: req.body.name },
       function (err, result) {
@@ -234,7 +233,6 @@ app.post("/borrarpokemon", (req, res, next) => {
   if (!req.session.username) {
     res.redirect("/");
   } else {
-    console.log(req.body.name);
     db.collection("pokemons").findOne(
       { name: req.body.name },
       function (err, result) {
@@ -254,7 +252,6 @@ app.post("/borrarpokemon", (req, res, next) => {
             //console.log(result.pokemons); //Muestra el array devuelto
             let dataPokes = result.pokemons;
 
-            console.log(dataPokes);
 
             res.redirect("mispokemons");
           });
@@ -363,7 +360,6 @@ app.post("/registro", (req, res, next) => {
 
   // Consultamos a la BBDD por el pokemon elegido.
 
-  console.log(req.body.name);
   db.collection("pokemons").findOne({ name: req.body.name },
     function (err, result) {
       if (err) throw err;
@@ -411,7 +407,6 @@ router.get("/logout", (req, res, next) => {
 //  Codigo para cambiar username
 app.post("/cambiarusername", (req, res, next) => {
   let newusername = req.body.newusername;
-  console.log(newusername, req.session.username);
 
   //Buscamos si ya hay un usuario registrado con ese nombre
   db.collection("users").findOne(
