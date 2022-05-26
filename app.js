@@ -29,14 +29,10 @@ const listaPokemons = [];
 var inicioSesionIncorrecto = false;
 var registroIncorrecto = false;
 var passwordIncorrecta = false;
-var passwordCambiada = false;
-var usernameCambiado = false;
 var usernameIncorrecto = false;
-var primeraVez = false;
+
 
 let db;
-let resApiPokemons;
-let parseo;
 
 app.set("views", __dirname + "/src/views");
 app.set("view engine", "hbs");
@@ -57,8 +53,6 @@ app.use(
 // Obtención del los 20 primeros pokemons de la API
 // Junto con su posterior carga en la Base de datos
 
-//          Comentar y descomentar
-/**********************************************/
 /*
 let a = 0;
 if (!primeraVez) {
@@ -148,17 +142,17 @@ MongoClient.connect(url, function (err, client) {
 //  -----------------------------------------------------------------------------------
 //  RENDERIZACION DE PAGINAS
 
-//  Pagina de login
+
 app.get("/", (req, res, next) => {
   res.render("index", { layout: false });
 });
 
-//  Pagina de registro
+//  Registro
 app.get("/registro", (req, res, next) => {
   res.render("registro", { layout: false });
 });
 
-//  Pagina de inicio
+//  Inicio tras registrarse
 app.get("/inicio", (req, res, next) => {
   if (!req.session.username) {
     res.redirect("/");
@@ -174,7 +168,6 @@ app.get("/inicio", (req, res, next) => {
         if (err) throw err;
 
         if (result) {
-          //Asigno los pokemons que tiene el usuario en la BD
           pokeIniciales = result.pokemons;
           nPokemons = pokeIniciales.length;
           fotoPerfil = pokeIniciales[0].sprite;
@@ -186,16 +179,13 @@ app.get("/inicio", (req, res, next) => {
   }
 });
 
-//  Pagina de mis pokemons
+//  Ver mis pokemons
 app.get("/mispokemons", (req, res, next) => {
   if (!req.session.username) {
     res.redirect("/");
   } else {
     let username = req.session.username;
-    /*
-    let pokeUsuario = db.collection("users").findOne({ username: req.session.username });
-    console.log(pokeUsuario);
-    */
+    
     db.collection("users").findOne(
       { username: req.session.username },
       function (err, result) {
@@ -209,7 +199,7 @@ app.get("/mispokemons", (req, res, next) => {
   }
 });
 
-//  Pagina añadir pokemons
+//  Añadir pokemons a cada usuario
 app.post("/anadirpokemon", (req, res, next) => {
   if (!req.session.username) {
     res.redirect("/");
@@ -228,7 +218,7 @@ app.post("/anadirpokemon", (req, res, next) => {
   }
 });
 
-//borrar pokemon
+// Borrar pokemon seleccionado
 app.post("/borrarpokemon", (req, res, next) => {
   if (!req.session.username) {
     res.redirect("/");
@@ -243,16 +233,13 @@ app.post("/borrarpokemon", (req, res, next) => {
           { $pull: { pokemons: result } }
         );
         let user = req.session.username;
-        //console.log(dataPoke);
+        
         let dataPoke = db
           .collection("users")
           .findOne({ username: req.session.username }, function (err, result) {
             if (err) throw err;
 
-            //console.log(result.pokemons); //Muestra el array devuelto
             let dataPokes = result.pokemons;
-
-
             res.redirect("mispokemons");
           });
       }
@@ -260,7 +247,7 @@ app.post("/borrarpokemon", (req, res, next) => {
   }
 });
 
-//  Pagina vert todos los pokemons
+//  Pagina ver todos los pokemons y extraerlos
 app.get("/maspokemons", (req, res, next) => {
   if (!req.session.username) {
     res.redirect("/");
@@ -280,16 +267,29 @@ app.get("/maspokemons", (req, res, next) => {
   }
 });
 
-//  Ver cada pokemon
-app.get("/verpokemon", (req, res, next) => {
+//  Ver el pokemon seleccionado
+app.get("/mispokemons/:pokeName", (req, res, next) => {
+
+  let username = req.session.username;
+  let pokeElegido;
+
   if (!req.session.username) {
     res.redirect("/");
   } else {
-    res.render("verpokemon", req.session);
+
+    db.collection("pokemons").findOne({ name: req.params.pokeName },
+      function (err, result) {
+        if (err) throw err;
+        
+        pokeElegido = result;
+        res.render("verpokemon", {username, pokeElegido});
+      }
+    );
+
   }
 });
 
-//  Pagina cuenta
+//  Página cuenta
 app.get("/cuenta", (req, res, next) => {
   if (!req.session.username) {
     res.redirect("/");
@@ -298,7 +298,7 @@ app.get("/cuenta", (req, res, next) => {
   }
 });
 
-//  Pagina contacto
+//  Página contacto
 app.get("/contacto", (req, res, next) => {
   if (!req.session.username) {
     res.redirect("/");
@@ -307,7 +307,7 @@ app.get("/contacto", (req, res, next) => {
   }
 });
 
-//  Not found get
+//  Not found 404
 app.get("/*", (req, res, next) => {
   if (!req.session.username) {
     res.redirect("/");
@@ -321,7 +321,7 @@ app.get("/*", (req, res, next) => {
 });
 //  -----------------------------------------------------------------------------------
 
-//  Codigo para hacer login
+//  Login
 app.post("/login", (req, res, next) => {
   // Recogemos el username y password que ha introducido el usuario
   let username = req.body.inputUsername;
@@ -351,15 +351,14 @@ app.post("/login", (req, res, next) => {
   );
 });
 
-//  Codigo para registrarse
+//  Registrarse
 app.post("/registro", (req, res, next) => {
   // Recogemos el username y password que ha introducido el usuario
   let username = req.body.inputUsername;
   let password = req.body.inputPassword;
   let pokeElegido;
 
-  // Consultamos a la BBDD por el pokemon elegido.
-
+  // Consultamos a la BBDD por el pokemon elegido por el usuario en el registro.
   db.collection("pokemons").findOne({ name: req.body.name },
     function (err, result) {
       if (err) throw err;
@@ -377,7 +376,7 @@ app.post("/registro", (req, res, next) => {
       if (findErr) throw findErr;
 
       if (!result) {
-        //Si no hay ningun usuario con ese nombre en la BBDD:
+        //Si no hay ningun usuario con ese nombre en la BBDD, se completa el registro.
         db.collection("users").insertOne(
           { username: username, password: password, pokemons: pokeElegido },
           function (findErr, result) {
@@ -390,6 +389,7 @@ app.post("/registro", (req, res, next) => {
             });
           }
         );
+        //Si ya existe el usuario en la BBDD, no permitimos el registro.
       } else {
         registroIncorrecto = true;
         res.render("registro", { registroIncorrecto, layout: false });
@@ -398,13 +398,13 @@ app.post("/registro", (req, res, next) => {
   );
 });
 
-//  Codigo para cerrar sesion
+// Cerrar sesion
 router.get("/logout", (req, res, next) => {
   delete req.session;
   res.redirect("/");
 });
 
-//  Codigo para cambiar username
+//  Cambiar username
 app.post("/cambiarusername", (req, res, next) => {
   let newusername = req.body.newusername;
 
@@ -414,7 +414,7 @@ app.post("/cambiarusername", (req, res, next) => {
     function (findErr, result) {
       if (findErr) throw findErr;
 
-      //Si no hay ningun usuario con ese nombre en la BBDD:
+      //Si no hay ningun usuario con el nuevo nombre, se permite el cambio
       if (!result) {
         MongoClient.connect(url, function (err, client) {
           var db = client.db("capstoneBD");
@@ -424,8 +424,7 @@ app.post("/cambiarusername", (req, res, next) => {
             { $set: { username: newusername } },
             function (findErr, result) {
               if (findErr) throw findErr;
-
-              //Redirigimos cambiando el username en la sesion
+              
               req.session.username = newusername;
 
               req.session.save(function (err) {
@@ -438,6 +437,7 @@ app.post("/cambiarusername", (req, res, next) => {
             }
           );
         });
+        //Si el nombre escogido ya existe en la BBDD, no permitimos el cambio
       } else {
         usernameIncorrecto = true;
         res.render("cuenta", { usernameIncorrecto });
@@ -446,7 +446,7 @@ app.post("/cambiarusername", (req, res, next) => {
   );
 });
 
-//  Codigo para cambiar contraseña
+//  Cambiar contraseña
 app.post("/cambiarpassword", (req, res, next) => {
   let newpassword = req.body.newpassword;
   let oldpassword = req.body.oldpassword;
@@ -481,7 +481,7 @@ app.post("/cambiarpassword", (req, res, next) => {
   );
 });
 
-//  Codigo para borrar cuenta
+//  Borrar cuenta
 app.post("/borrarcuenta", (req, res, next) => {
   db.collection("users").deleteOne(
     { username: req.session.username },
