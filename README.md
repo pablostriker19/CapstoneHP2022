@@ -21,7 +21,6 @@ npm install cookie-parser
 npm install body-parser
 npm install nodemon
 npm install express-session
-npm install crypto
 ```
 
 ## Ejecución 📦
@@ -36,5 +35,5 @@ Y el script de ejecucion iniciará la aplicacion en el puerto 5000
 
 * **Juan Luca de Tena** - [juanlucadetena](https://github.com/juanlucadetena)
 * **Pablo González** - [pablostriker19](https://github.com/pablostriker19)
-* **Rodrigo García-Casillas** - [rodrigoGCB](https://github.com/villanuevand)
+* **Rodrigo García-Casillas** - [rodrigoGCB](https://github.com/RodriGCB)
 
